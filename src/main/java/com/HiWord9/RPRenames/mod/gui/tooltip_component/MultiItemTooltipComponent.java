@@ -3,9 +3,9 @@ package com.HiWord9.RPRenames.mod.gui.tooltip_component;
 import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.gui.Graphics;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -39,7 +39,8 @@ public class MultiItemTooltipComponent implements TooltipComponent {
         return SLOT_SIZE * Math.min(4, 3 + (size - 4) / 3);
     }
 
-    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
+    @Override
+    public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
         int i = 0;
         int size = items.size();
         var sorted = sort(items);
@@ -58,7 +59,7 @@ public class MultiItemTooltipComponent implements TooltipComponent {
             int j = x + SLOT_SIZE * xOffset;
             int k = y + SLOT_SIZE * yOffset;
 
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, SLOT, j, k, 0, 0, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE);
+            context.drawTexture(RenderLayer::getGuiTextured, SLOT, j, k, 0, 0, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE);
 
             if (i == 7 && size > 8) {
                 Graphics.renderText(context, Text.of("+" + (size - 7)), j + SLOT_SIZE / 2, k + 5, true, true);
