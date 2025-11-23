@@ -3,10 +3,10 @@ package com.HiWord9.RPRenames.mod.gui.widget.external;
 import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.gui.widget.OffsetableWidget;
 import com.HiWord9.RPRenames.mod.gui.widget.RPRWidget;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 
 public class OpenerButton extends ClickableWidget implements OffsetableWidget {
@@ -33,16 +33,20 @@ public class OpenerButton extends ClickableWidget implements OffsetableWidget {
         int v = 0;
         v += rprWidget.isOpen() ? OPENED_OFFSET_V : 0;
         v += hovered ? FOCUSED_OFFSET_V : 0;
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, getX(), getY(), u, v, getWidth(), getHeight(), TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        
+        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, getX(), getY(), u, v, getWidth(), getHeight(), TEXTURE_WIDTH, TEXTURE_HEIGHT);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean released) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        
         if (this.isMouseOver(mouseX, mouseY)) {
             execute();
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, released);
     }
 
     @Override
