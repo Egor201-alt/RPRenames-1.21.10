@@ -5,7 +5,6 @@ import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.CEMRenameRendererBuilder;
 import com.HiWord9.RPRenames.api.rename.renderer.builder.RenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.util.PropertiesHelper;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.EntityType;
@@ -14,10 +13,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
-import net.minecraft.storage.NbtReadView;
 import net.minecraft.text.Text;
-import net.minecraft.util.ErrorReporter;
+import net.minecraft.util.Identifier;
 
 import java.util.Objects;
 import java.util.Properties;
@@ -89,7 +88,7 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
         if (spawnEggItem == null) {
             NbtCompound nbtName = new NbtCompound();
             nbtName.putString("id", Registries.ENTITY_TYPE.getId(this.getEntity()).toString());
-            NbtComponent.set(DataComponentTypes.ENTITY_DATA, stack, nbtName);
+            stack.set(DataComponentTypes.ENTITY_DATA, NbtComponent.of(nbtName));
         }
         return stack;
     }
@@ -98,20 +97,22 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
     public boolean matchesStack(ItemStack stack) {
         if (itemRename != null && itemRename.matchesStack(stack)) return true;
         if (stack.getItem() instanceof SpawnEggItem spawnEggItem && client().world != null) {
-            var registries = client().world.getRegistryManager();
-
-            var entityType = spawnEggItem.getEntityType(registries, stack);
-            var name = stack.getCustomName();
+            
+            var entityType = spawnEggItem.getEntityType(stack);
+            
+            var name = stack.getName();
 
             var entityData = stack.get(DataComponentTypes.ENTITY_DATA);
             if (entityData != null) {
                 var nbt = entityData.copyNbt();
 
-                try (var logging = new ErrorReporter.Logging(ErrorReporter.Logging.CONTEXT, RPRenames.LOGGER)) {
-
-                    var readView = NbtReadView.create(logging, registries, nbt);
-                    Text parsed = BlockEntity.tryParseCustomName(readView, "CustomName");
-                    if (parsed != null) name = parsed;
+                if (nbt.contains("CustomName", NbtElement.STRING_TYPE)) {
+                    try {
+                        String jsonName = nbt.getString("CustomName");
+                        Text parsed = Text.Serialization.fromJson(jsonName, client().world.getRegistryManager());
+                        if (parsed != null) name = parsed;
+                    } catch (Exception ignored) {
+                    }
                 }
             }
 
@@ -119,7 +120,7 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
                 var namePattern = getNamePattern();
 
                 if (namePattern == null
-                        ? name.equals(this.getName())
+                        ? name.equals(this.getName()) // Сравнение Text
                         : namePattern.matcher(name.getString()).matches()
                 ) return true;
             }
