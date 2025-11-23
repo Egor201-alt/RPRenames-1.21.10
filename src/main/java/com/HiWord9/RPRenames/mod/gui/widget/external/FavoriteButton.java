@@ -3,10 +3,10 @@ package com.HiWord9.RPRenames.mod.gui.widget.external;
 import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.gui.widget.OffsetableWidget;
 import com.HiWord9.RPRenames.mod.gui.widget.RPRWidget;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 
@@ -41,8 +41,9 @@ public class FavoriteButton extends ClickableWidget implements OffsetableWidget 
 
         int u = 0;
         int v = favorite ? 0 : V_OFFSET;
+        
         context.drawTexture(
-                RenderPipelines.GUI_TEXTURED,
+                RenderLayer::getGuiTextured,
                 TEXTURE,
                 getX(), getY(),
                 u, v,
@@ -55,7 +56,10 @@ public class FavoriteButton extends ClickableWidget implements OffsetableWidget 
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean released) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        
         if (this.isMouseOver(mouseX, mouseY)) {
             var item = rprWidget.getCraftItem();
             if (item == Items.AIR) return true;
@@ -63,7 +67,7 @@ public class FavoriteButton extends ClickableWidget implements OffsetableWidget 
             rprWidget.addOrRemoveFavorite(!favorite, List.of(item), rprWidget.getNameText());
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, released);
     }
 
     public enum Position {
