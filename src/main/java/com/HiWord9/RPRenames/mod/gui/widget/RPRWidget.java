@@ -10,13 +10,15 @@ import com.HiWord9.RPRenames.api.RenamesManager;
 import com.HiWord9.RPRenames.mod.util.RenamesSearchEngine;
 import com.HiWord9.RPRenames.api.rename.Rename;
 import com.HiWord9.RPRenames.mod.impl.rename.CITRename;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.render.RenderLayer; 
+import net.minecraft.client.gui.screen.Screen; 
+import net.minecraft.client.input.KeyInput; 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -33,7 +35,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.HiWord9.RPRenames.mod.util.Util.*;
-import static net.minecraft.client.gui.screen.Screen.hasShiftDown;
 
 public class RPRWidget implements Drawable, Element, OffsetableWidget {
     protected static Identifier MENU_TEXTURE = Identifier.of(RPRenames.MOD_ID, "textures/gui/menu.png");
@@ -225,11 +226,11 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
     }
 
     public void prevPage() {
-        openPage(hasShiftDown() ? 0 : page - 1);
+        openPage(Screen.hasShiftDown() ? 0 : page - 1);
     }
 
     public void nextPage() {
-        openPage(hasShiftDown() ? -1 : page + 1);
+        openPage(Screen.hasShiftDown() ? -1 : page + 1);
     }
 
 // Execution
@@ -338,7 +339,7 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
         checkForInvChanges();
 
         context.drawTexture(
-                RenderPipelines.GUI_TEXTURED,
+                RenderLayer::getGuiTextured,
                 MENU_TEXTURE,
                 getX() + MENU_START_X, getY(),
                 0,0,
@@ -396,6 +397,12 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        
         if (!open) return false;
 
         for (Element widget : widgets) {
@@ -418,7 +425,7 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
 
         return false;
     }
-
+    
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         for (Element widget : widgets) {
