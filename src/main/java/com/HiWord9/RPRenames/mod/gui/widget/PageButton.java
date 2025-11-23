@@ -1,17 +1,16 @@
 package com.HiWord9.RPRenames.mod.gui.widget;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.gui.screen.Screen; 
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import static com.HiWord9.RPRenames.mod.util.Util.*;
-import static net.minecraft.client.gui.screen.Screen.hasShiftDown;
 
 public class PageButton extends ClickableWidget implements OffsetableWidget {
     private static final Identifier TEXTURE = Identifier.of(RPRenames.MOD_ID, "textures/gui/page_arrows.png");
@@ -40,15 +39,20 @@ public class PageButton extends ClickableWidget implements OffsetableWidget {
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         int u = type == Type.DOWN ? 0 : UP_OFFSET_U;
         int v = !active ? DISABLED_OFFSET_V : hovered ? FOCUSED_OFFSET_V : 0;
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, getX(), getY(), u, v, getWidth(), getHeight(), TEXTURE_WIDTH, TEXTURE_HEIGHT);
-        if (!config().disablePageArrowsHints && hasShiftDown() && active && hovered) {
+        
+        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, getX(), getY(), u, v, getWidth(), getHeight(), TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        
+        if (!config().disablePageArrowsHints && Screen.hasShiftDown() && active && hovered) {
             String key = "rprenames.gui.page" + (type == Type.DOWN ? "Down.toFirst" : "Up.toLast") + ".tooltip";
             context.drawTooltip(textRenderer(), Text.translatable(key).formatted(Formatting.GRAY), mouseX, mouseY);
         }
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean released) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        
         if (this.isMouseOver(mouseX, mouseY)) {
             if (type == Type.DOWN) {
                 rprWidget.prevPage();
@@ -57,9 +61,10 @@ public class PageButton extends ClickableWidget implements OffsetableWidget {
             }
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, released);
     }
 
+    @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
 
     public enum Type {
