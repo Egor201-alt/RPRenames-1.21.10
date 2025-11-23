@@ -1,10 +1,10 @@
 package com.HiWord9.RPRenames.mod.gui.widget;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -39,7 +39,7 @@ public class RandomButton extends ClickableWidget implements OffsetableWidget {
         if (!active) return;
         int u = 0;
         int v = V_OFFSET * side;
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, getX(), getY(), u, v, getWidth(), getHeight(), TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, getX(), getY(), u, v, getWidth(), getHeight(), TEXTURE_WIDTH, TEXTURE_HEIGHT);
         if (!hovered) return;
         context.drawTooltip(textRenderer(), Text.translatable(TOOLTIP_KEY), mouseX, mouseY);
     }
@@ -48,7 +48,10 @@ public class RandomButton extends ClickableWidget implements OffsetableWidget {
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean released) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+
         if (this.isMouseOver(mouseX, mouseY)) {
             int randomNumber = randomNumber();
 
@@ -63,7 +66,7 @@ public class RandomButton extends ClickableWidget implements OffsetableWidget {
 
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, released);
     }
 
     public void setSide(int side) {
