@@ -8,7 +8,7 @@ import com.HiWord9.RPRenames.api.rename.renderer.builder.RenameRendererBuilder;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
+// import net.minecraft.enchantment.EnchantmentHelper; // Больше не нужен здесь
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
@@ -162,6 +162,8 @@ public class CITRename extends ResourcePackRename implements HasProperties, HasN
             bl = super.matchesStack(stack);
         } else {
             if (getItems().contains(stack.getItem())) {
+                // ИСПРАВЛЕНО: В 1.21.2+ Custom Name возвращает Text компонент.
+                // getString() работает корректно.
                 var customName = stack.get(DataComponentTypes.CUSTOM_NAME);
                 if (customName != null) {
                     bl = namePattern.matcher(customName.getString()).matches();
@@ -195,8 +197,10 @@ public class CITRename extends ResourcePackRename implements HasProperties, HasN
                 hasEnchant = true;
                 hasEnoughLevels = true;
             } else {
-                ItemEnchantmentsComponent enchantments;
-                enchantments = EnchantmentHelper.getEnchantments(stack);
+                // ИСПРАВЛЕНО для 1.21.10+:
+                // Вместо EnchantmentHelper.getEnchantments(stack) используем прямой геттер компонента
+                ItemEnchantmentsComponent enchantments = stack.getEnchantments(); 
+                // Или stack.get(DataComponentTypes.ENCHANTMENTS) если геттера нет в твоих маппингах
 
                 for (RegistryEntry<Enchantment> entry : enchantments.getEnchantments()) {
                     Optional<RegistryKey<Enchantment>> key = entry.getKey();
@@ -214,39 +218,22 @@ public class CITRename extends ResourcePackRename implements HasProperties, HasN
             }
         }
 
-        /**
-         * Returns true if given stack's count passes rename's requirements, false otherwise.
-         */
         public boolean enoughStackSize() {
             return enoughStackSize;
         }
 
-        /**
-         * Returns true if given stack's damage passes rename's requirements, false otherwise.
-         */
         public boolean enoughDamage() {
             return enoughDamage;
         }
 
-        /**
-         * Returns true if given stack's enchantment list passes rename's requirements, false otherwise.
-         */
         public boolean hasEnchant() {
             return hasEnchant;
         }
 
-        /**
-         * Returns true if given stack's enchantment levels passes rename's requirements, false otherwise.
-         */
         public boolean hasEnoughLevels() {
             return hasEnoughLevels;
         }
 
-        /**
-         * Returns true if given stack passes rename's requirements, false if at least one does not.
-         * Basically means "This stack can (not) be renamed with no additional changes".
-         * Note that it does not take in count stack's item.
-         */
         public boolean matches() {
             return enoughStackSize()
                     && enoughDamage()
