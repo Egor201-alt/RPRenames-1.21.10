@@ -1,7 +1,6 @@
 package com.HiWord9.RPRenames.mod.impl.rename;
 
 import com.HiWord9.RPRenames.api.rename.Rename;
-import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.CEMRenameRendererBuilder;
 import com.HiWord9.RPRenames.api.rename.renderer.builder.RenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.util.PropertiesHelper;
@@ -13,10 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 import java.util.Objects;
 import java.util.Properties;
@@ -104,15 +101,13 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
 
             var entityData = stack.get(DataComponentTypes.ENTITY_DATA);
             if (entityData != null) {
-                var nbt = entityData.copyNbt();
-
-                if (nbt.contains("CustomName", NbtElement.STRING_TYPE)) {
+                NbtCompound nbt = entityData.copyNbt();
+                if (nbt.contains("CustomName", 8)) { // 8 = String type
                     try {
                         String jsonName = nbt.getString("CustomName");
                         Text parsed = Text.Serialization.fromJson(jsonName, client().world.getRegistryManager());
                         if (parsed != null) name = parsed;
-                    } catch (Exception ignored) {
-                    }
+                    } catch (Exception ignored) {}
                 }
             }
 
@@ -120,7 +115,7 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
                 var namePattern = getNamePattern();
 
                 if (namePattern == null
-                        ? name.equals(this.getName()) // Сравнение Text
+                        ? name.equals(this.getName())
                         : namePattern.matcher(name.getString()).matches()
                 ) return true;
             }
