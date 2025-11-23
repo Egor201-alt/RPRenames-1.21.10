@@ -7,7 +7,7 @@ import com.HiWord9.RPRenames.mod.gui.Graphics;
 import com.HiWord9.RPRenames.mod.gui.RPRInteractableScreen;
 import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.AcceptsFavoriteSupplier;
 import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.AcceptsRPRWidget;
-import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.render.RenderLayer; 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -63,8 +63,9 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         int u = favorite ? FAVORITE_OFFSET_U : 0;
         int v = hovered || (selected && config().highlightSelected) ? FOCUSED_OFFSET_V : 0;
+        
         context.drawTexture(
-                RenderPipelines.GUI_TEXTURED,
+                RenderLayer::getGuiTextured,
                 TEXTURE,
                 getX(), getY(),
                 u, v,
@@ -97,10 +98,14 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean released) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int button = click.button();
+
         if (!this.isMouseOver(mouseX, mouseY)) return false;
 
-        if (button == 1) {
+        if (button == 1) { // Right click
             List<Item> items;
 
             if (rprWidget.getCurrentTab().forCraftItemOnly) items = List.of(rprWidget.getCraftItem());
