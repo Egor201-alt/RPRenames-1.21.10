@@ -7,8 +7,8 @@ import com.HiWord9.RPRenames.mod.gui.Graphics;
 import com.HiWord9.RPRenames.mod.gui.RPRInteractableScreen;
 import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.AcceptsFavoriteSupplier;
 import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.AcceptsRPRWidget;
-import net.minecraft.client.render.RenderLayer; 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -63,9 +63,8 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         int u = favorite ? FAVORITE_OFFSET_U : 0;
         int v = hovered || (selected && config().highlightSelected) ? FOCUSED_OFFSET_V : 0;
-        
+
         context.drawTexture(
-                RenderLayer::getGuiTextured,
                 TEXTURE,
                 getX(), getY(),
                 u, v,
@@ -77,7 +76,7 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
                 mouseX, mouseY,
                 getX(), getY(),
                 getWidth() - 1,
-                getHeight() - 1 // -1 cause of shadow
+                getHeight() - 1
         );
     }
 
@@ -98,7 +97,7 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean released) {
+    public boolean mouseClicked(Element.Click click, boolean released) {
         double mouseX = click.x();
         double mouseY = click.y();
         int button = click.button();
