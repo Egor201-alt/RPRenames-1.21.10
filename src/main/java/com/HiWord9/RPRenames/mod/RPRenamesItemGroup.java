@@ -61,8 +61,10 @@ public class RPRenamesItemGroup {
     public static boolean verifyItemGroup(ItemGroup itemGroup) {
         ItemStack icon = itemGroup.getIcon();
         NbtComponent nbtComponent = icon.get(DataComponentTypes.CUSTOM_DATA);
+        
         if (nbtComponent == null) return false;
-        return nbtComponent.contains(RPRenames.MOD_ID);
+        
+        return nbtComponent.copyNbt().contains(RPRenames.MOD_ID);
     }
 
     public static List<ItemStack> searchStacks(List<ItemStack> renamedItemStacks, String search) {
