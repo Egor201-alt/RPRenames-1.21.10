@@ -429,7 +429,7 @@ public class RPRWidget implements Drawable, OffsetableWidget {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!open) return false;
         for (ClickableWidget widget : widgets) {
-            if (widget.mouseClicked(mouseX, mouseY, button), false) {
+            if (widget.mouseClicked((mouseX, mouseY, button), false) {
                 if (widget == searchField && currentScreen() != null) currentScreen().setFocused(searchField);
                 return true;
             } else if (widget == searchField && currentScreen() != null && currentScreen().getFocused() == searchField && button == 0 && !widget.isMouseOver(mouseX, mouseY)) {
