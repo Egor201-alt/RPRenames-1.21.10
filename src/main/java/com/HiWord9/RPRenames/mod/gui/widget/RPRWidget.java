@@ -704,7 +704,7 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
 
     protected int getMaxPageIndex() {
         return Math.max(0, (filteredRenames.size() - 1)) / BUTTONS_ON_PAGE;
-    }
+    } 
 
     public enum Tab {
         SEARCH(0, true),
