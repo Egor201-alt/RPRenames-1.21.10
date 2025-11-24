@@ -250,18 +250,18 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
 
     public void prevPage() {
         Window window = MinecraftClient.getInstance().getWindow();
-        boolean shift = InputUtil.isKeyPressed(window.getHandle(), GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(window.getHandle(), GLFW.GLFW_KEY_RIGHT_SHIFT);
+        boolean shift = InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
         openPage(shift ? 0 : page - 1);
     }
-
+    
     public void nextPage() {
-        long handle = MinecraftClient.getInstance().getWindow().getHandle();
-        boolean shift = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
+        Window window = MinecraftClient.getInstance().getWindow();
+        boolean shift = InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
         openPage(shift ? -1 : page + 1);
     }
-
+    
     public void updatePage() {
-        refreshPageContent();
+        refreshPageContent(); 
     }
 
 // Execution
@@ -428,37 +428,21 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!open) return false;
-
         for (ClickableWidget widget : widgets) {
             if (widget.mouseClicked(mouseX, mouseY, button)) {
-                if (widget == searchField && currentScreen() != null) {
-                    currentScreen().setFocused(searchField);
-                }
+                if (widget == searchField && currentScreen() != null) currentScreen().setFocused(searchField);
                 return true;
-            } else if (
-                    widget == searchField
-                            && currentScreen() != null
-                            && currentScreen().getFocused() == searchField
-                            && button == 0
-                            && !widget.isMouseOver(mouseX, mouseY)
-            ) {
+            } else if (widget == searchField && currentScreen() != null && currentScreen().getFocused() == searchField && button == 0 && !widget.isMouseOver(mouseX, mouseY)) {
                 currentScreen().setFocused(null);
             }
         }
-
-        for (RenameButton renameButton : buttons) {
-            if (renameButton.mouseClicked(mouseX, mouseY, button)) return true;
-        }
-
+        for (RenameButton renameButton : buttons) { if (renameButton.mouseClicked(mouseX, mouseY, button)) return true; }
         return false;
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!open) return false;
-
-        for (ClickableWidget widget : widgets) {
-            if (widget.keyPressed(keyCode, scanCode, modifiers)) return true;
-        }
+        for (ClickableWidget widget : widgets) { if (widget.keyPressed(keyCode, scanCode, modifiers)) return true; }
         return false;
     }
 
