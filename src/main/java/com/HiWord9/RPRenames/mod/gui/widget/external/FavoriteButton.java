@@ -3,11 +3,13 @@ package com.HiWord9.RPRenames.mod.gui.widget.external;
 import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.gui.widget.OffsetableWidget;
 import com.HiWord9.RPRenames.mod.gui.widget.RPRWidget;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.item.Items;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
@@ -31,7 +33,7 @@ public class FavoriteButton extends ClickableWidget implements OffsetableWidget 
     }
 
     public FavoriteButton(RPRWidget instance, int x, int y) {
-        super(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, null);
+        super(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, Text.empty());
         rprWidget = instance;
     }
 
@@ -41,11 +43,12 @@ public class FavoriteButton extends ClickableWidget implements OffsetableWidget 
 
         int u = 0;
         int v = favorite ? 0 : V_OFFSET;
-        
+
         context.drawTexture(
+                RenderPipelines.GUI_TEXTURED,
                 TEXTURE,
                 getX(), getY(),
-                u, v,
+                (float) u, (float) v,
                 getWidth(), getHeight(),
                 TEXTURE_WIDTH, TEXTURE_HEIGHT
         );
@@ -55,18 +58,26 @@ public class FavoriteButton extends ClickableWidget implements OffsetableWidget 
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
 
     @Override
-    public boolean mouseClicked(Element.Click click, boolean released) {
-        double mouseX = click.x();
-        double mouseY = click.y();
-        
-        if (this.isMouseOver(mouseX, mouseY)) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (!this.active || !this.visible) return false;
+
+        if (this.isMouseOver(mouseX, mouseY) && button == 0) {
+            this.playDownSound(MinecraftClient.getInstance().getSoundManager());
+            
             var item = rprWidget.getCraftItem();
             if (item == Items.AIR) return true;
 
             rprWidget.addOrRemoveFavorite(!favorite, List.of(item), rprWidget.getNameText());
             return true;
         }
-        return super.mouseClicked(click, released);
+        
+        return false;
+    }
+
+    @Override
+    public void offset(int x, int y) {
+        setX(getX() + x);
+        setY(getY() + y);
     }
 
     public enum Position {
