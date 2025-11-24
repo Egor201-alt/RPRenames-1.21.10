@@ -18,6 +18,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -338,6 +339,7 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
         checkForInvChanges();
 
         context.drawTexture(
+                RenderPipelines.GUI_TEXTURED,
                 MENU_TEXTURE,
                 getX() + MENU_START_X, getY(),
                 0,0,
@@ -418,7 +420,6 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
         return false;
     }
     
-    // ИСПРАВЛЕНИЕ: Новый метод keyPressed(KeyInput)
     @Override
     public boolean keyPressed(KeyInput input) {
         for (Element widget : widgets) {
