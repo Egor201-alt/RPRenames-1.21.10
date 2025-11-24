@@ -17,7 +17,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
-import org.joml.Matrix3x2fStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,14 +54,15 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         if (shouldNotModify() || init) return;
         init = true;
 
-        assert client != null && client.currentScreen != null;
-        int x = ((AnvilScreen) client.currentScreen).x;
-        int y = ((AnvilScreen) client.currentScreen).y;
+        // Безопасное приведение типов
+        AnvilScreen screen = (AnvilScreen) (Object) this;
+        int x = screen.x;
+        int y = screen.y;
 
         opener = new OpenerButton(rprWidget, x + 3, y + 44);
         favoriteButton = new FavoriteButton(rprWidget, x, y, config().favoriteButtonPosition);
 
-        var slots = ((AnvilScreen) client.currentScreen).getScreenHandler().slots;
+        var slots = screen.getScreenHandler().slots;
         ghostCraft = new GhostCraft(
                 new GhostCraft.GhostSlot(x + slots.get(0).x - 1, y + slots.get(0).y - 1),
                 new GhostCraft.GhostSlot(x + slots.get(1).x - 1, y + slots.get(1).y - 1),
@@ -70,8 +70,8 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         );
 
         RPRInteractableScreen rprInteractableScreen = null;
-        if (client.currentScreen instanceof RPRInteractableScreen screen) {
-            rprInteractableScreen = screen;
+        if ((Object)this instanceof RPRInteractableScreen interactable) {
+            rprInteractableScreen = interactable;
         }
 
         rprWidget.init(
@@ -131,6 +131,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         if (shouldNotModify()) return super.mouseClicked(mouseX, mouseY, button);
         afterPutInAnvilFirst = false;
         afterPutInAnvilSecond = false;
+        
         if (opener.mouseClicked(mouseX, mouseY, button)) return true;
         if (favoriteButton.mouseClicked(mouseX, mouseY, button)) return true;
         if (ghostCraft.mouseClicked(mouseX, mouseY, button)) {
@@ -142,6 +143,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
             }
         }
         if (rprWidget.mouseClicked(mouseX, mouseY, button)) return true;
+        
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -150,33 +152,13 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         if (shouldNotModify()) return;
         if (slotId != 0) return;
 
-        /*
-            Sometimes On server, after using putInAnvil() method client receives 3 changes on screen:
-            1. Local changes on client side
-            2. First packet from server, it tells what was in slot
-            3. Second packet from server, it tells how slot actually changed (the same as local changes)
-
-            So onSlotUpdate() method is called 3 times,
-            and for rpr it looks like after moving stacks automatically
-            player puts back previous stack in 0 slot and then puts new one again,
-            what leads to changing tab to Search and resetting nameField.
-
-            That's why there are a few fuses:
-            1. First change is proceeded normally, the local one
-            2. Second is ignored
-            3. Third is ignored if it matches expected stack, the one that was places in slot 0 automatically.
-
-            There is no such problem in singleplayer, so in singleplayer this is not proceeded.
-        */
         if (config().fixDelayedPacketsChangingTab) {
-            // Executing local changes normally and setting flag
             if (afterPutInAnvilFirst) {
                 afterPutInAnvilFirst = false;
                 afterPutInAnvilSecond = true;
                 return;
             }
 
-            // Ignoring first packet from server
             if (afterPutInAnvilSecond) {
                 afterPutInAnvilSecond = false;
                 ci.cancel();
@@ -184,7 +166,6 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
             }
         }
 
-        // Ignoring changes if stack did not change. Works for manual moving stacks too.
         if (ItemStack.areEqual(stack, rprWidget.getActiveItemStack())) ci.cancel();
     }
 
@@ -222,19 +203,20 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         if (shouldNotModify()) return;
         if (client == null || client.currentScreen == null) return;
 
-        int xScreenOffset = ((AnvilScreen) client.currentScreen).x;
-        int yScreenOffset = ((AnvilScreen) client.currentScreen).y;
+        AnvilScreen screen = (AnvilScreen) client.currentScreen;
+        int xScreenOffset = screen.x;
+        int yScreenOffset = screen.y;
 
-        Matrix3x2fStack matrices = context.getMatrices();
-        matrices.pushMatrix();
-        matrices.translate(-xScreenOffset, -yScreenOffset);
+        MatrixStack matrices = context.getMatrices();
+        matrices.push();
+        matrices.translate(-xScreenOffset, -yScreenOffset, 0);
 
         opener.render(context, mouseX, mouseY, 0);
         favoriteButton.render(context, mouseX, mouseY, 0);
         ghostCraft.render(context, mouseX, mouseY, 0);
         rprWidget.render(context, mouseX, mouseY, 0);
 
-        matrices.popMatrix();
+        matrices.pop();
     }
 
     @Override
