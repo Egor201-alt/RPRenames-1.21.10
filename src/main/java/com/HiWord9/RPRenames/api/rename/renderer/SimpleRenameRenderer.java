@@ -2,6 +2,7 @@ package com.HiWord9.RPRenames.api.rename.renderer;
 
 import com.HiWord9.RPRenames.api.rename.Rename;
 import com.HiWord9.RPRenames.mod.gui.Graphics;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -13,7 +14,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.HiWord9.RPRenames.mod.util.Util.*;
+import static com.HiWord9.RPRenames.mod.util.Util.*; 
 
 public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
     protected T rename;
@@ -47,7 +48,7 @@ public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
 
         Graphics.drawTooltip(
                 context,
-                textRenderer(),
+                MinecraftClient.getInstance().textRenderer,
                 tooltipComponents,
                 mouseX, mouseY,
                 HoveredTooltipPositioner.INSTANCE
@@ -73,7 +74,8 @@ public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
     }
 
     private boolean isNKeyJustPressed() {
-        if (InputUtil.isKeyPressed(client().getWindow().getHandle(), GLFW.GLFW_KEY_N)) {
+        long handle = MinecraftClient.getInstance().getWindow().getHandle();
+        if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_N)) {
             if (!nPressFuse) {
                 nPressFuse = true;
                 return true;
