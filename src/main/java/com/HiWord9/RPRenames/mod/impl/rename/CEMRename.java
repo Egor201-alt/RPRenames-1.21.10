@@ -48,7 +48,7 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
             Properties properties,
             Rename itemRename
     ) {
-        super(Text.of(name), packName, path, DEFAULT_MOB_ITEM);
+        super(Text.literal(name), packName, path, DEFAULT_MOB_ITEM);
         this.entity = entity;
         this.properties = properties;
         this.namePattern = namePattern;
@@ -108,31 +108,29 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
 
             @SuppressWarnings("unchecked")
             ComponentType<NbtComponent> type = (ComponentType<NbtComponent>) (Object) DataComponentTypes.ENTITY_DATA;
-            
             var entityData = stack.get(type);
             
             if (entityData != null) {
-
                 NbtCompound nbt = entityData.copyNbt();
                 
-                if (nbt.contains("CustomName") && nbt.getType("CustomName") == NbtElement.STRING_TYPE) { 
-                   try {
-                       String jsonName = nbt.getString("CustomName");
-                       
-                       Text parsedName = Text.TextCodecs.CODEC.parse(net.minecraft.registry.DynamicOps.of(net.minecraft.nbt.NbtOps.INSTANCE, net.minecraft.nbt.NbtString.of(jsonName))).result().orElse(null);
-                       
-                       if (parsedName == null) {
-                           parsedName = Text.Serialization.fromJson(jsonName, client().world.getRegistryManager());
-                       }
-                       
-                       if (parsedName != null) {
-                           name = parsedName;
-                       }
-                   } catch (Throwable t) {
-                       try {
-                           name = Text.of(nbt.getString("CustomName"));
-                       } catch (Exception ignored) {}
-                   }
+                if (nbt.contains("CustomName")) {
+                    NbtElement element = nbt.get("CustomName");
+                    if (element != null && element.getType() == NbtElement.STRING_TYPE) {
+                        try {
+                            String jsonName = element.asString();
+                            
+                            Text parsedName = null;
+                            try {
+                                parsedName = Text.Serializer.fromJson(jsonName, client().world.getRegistryManager());
+                            } catch (Throwable t) {
+                                parsedName = Text.literal(jsonName);
+                            }
+
+                            if (parsedName != null) {
+                                name = parsedName;
+                            }
+                        } catch (Exception ignored) {}
+                    }
                 }
             }
 
