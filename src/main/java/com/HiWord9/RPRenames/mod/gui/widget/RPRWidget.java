@@ -56,7 +56,7 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
 
     protected boolean open;
 
-    public boolean configFavorite = false; 
+    public boolean configFavorite = false;
 
     protected RPRInteractableScreen screen;
     protected RenamesManager<?> renamesManager;
@@ -121,20 +121,19 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
         this.ghostCraft = ghostCraft;
 
         this.screen = parentScreen;
-        
         this.configFavorite = config().favorite;
 
         pageDown = new PageButton(
                 this,
                 MENU_START_X + BUTTON_X_OFFSET,
                 PAGE_BUTTONS_Y,
-                false
+                PageButton.Type.DOWN
         );
         pageUp = new PageButton(
                 this,
-                WIDGET_WIDTH - BUTTON_X_OFFSET - 13,
+                WIDGET_WIDTH - BUTTON_X_OFFSET - PageButton.BUTTON_WIDTH,
                 PAGE_BUTTONS_Y,
-                true
+                PageButton.Type.UP
         );
 
         int tabsOffset = TabButton.BUTTON_HEIGHT + TAB_OFFSET_Y;
@@ -145,12 +144,13 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
 
         randomButton = new RandomButton(
                 this,
-                WIDGET_WIDTH - 14 - 9,
-                14
+                WIDGET_WIDTH - 14 - RandomButton.BUTTON_WIDTH,
+                14,
+                randomNumber() % RandomButton.SIDES
         );
 
         searchField = new TextFieldWidget(
-                textRenderer(),
+                MinecraftClient.getInstance().textRenderer,
                 MENU_START_X + SEARCH_FIELD_X_OFFSET,
                 15,
                 MENU_TEXTURE_WIDTH - 53, 10,
@@ -178,7 +178,7 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
     public boolean isOpen() {
         return open;
     }
-    
+
     public void setOpen(boolean open) {
         if (open) open(); else close();
     }
@@ -227,11 +227,11 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
     public Tab getCurrentTab() {
         return currentTab;
     }
-    
+
     public void openRandom() {
         if (!filteredRenames.isEmpty()) {
-             int randIndex = (int)(Math.random() * filteredRenames.size());
-             doRename(filteredRenames.get(randIndex));
+            int randIndex = (int)(Math.random() * filteredRenames.size());
+            doRename(filteredRenames.get(randIndex));
         }
     }
 
@@ -257,7 +257,7 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
         boolean shift = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
         openPage(shift ? -1 : page + 1);
     }
-    
+
     public void updatePage() {
         refreshPageContent();
     }
@@ -438,20 +438,20 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
                     widget == searchField
                             && currentScreen() != null
                             && currentScreen().getFocused() == searchField
-                            && button == 0 
+                            && button == 0
                             && !widget.isMouseOver(mouseX, mouseY)
             ) {
                 currentScreen().setFocused(null);
             }
         }
-        
+
         for (RenameButton renameButton : buttons) {
             if (renameButton.mouseClicked(mouseX, mouseY, button)) return true;
         }
 
         return false;
     }
-    
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!open) return false;
@@ -704,7 +704,7 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
 
     protected int getMaxPageIndex() {
         return Math.max(0, (filteredRenames.size() - 1)) / BUTTONS_ON_PAGE;
-    } 
+    }
 
     public enum Tab {
         SEARCH(0, true),
