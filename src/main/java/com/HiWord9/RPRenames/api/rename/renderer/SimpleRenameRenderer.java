@@ -14,7 +14,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.HiWord9.RPRenames.mod.util.Util.*; 
+import static com.HiWord9.RPRenames.mod.util.Util.*;
 
 public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
     protected T rename;
@@ -24,7 +24,6 @@ public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
     public SimpleRenameRenderer(T rename) {
         this.rename = rename;
         this.stack = rename.toStack();
-
         addNameTooltip();
     }
 
@@ -45,7 +44,6 @@ public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
     @Override
     public void onRenderTooltip(DrawContext context, int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight) {
         updateRenameIndex();
-
         Graphics.drawTooltip(
                 context,
                 MinecraftClient.getInstance().textRenderer,
@@ -60,14 +58,11 @@ public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
     protected void updateRenameIndex() {
         List<Text> texts = rename.getNames();
         if (texts.isEmpty()) return;
-
         int current = rename.getCurrentIndex();
-
         if (isNKeyJustPressed()) {
             current = (current + 1) % texts.size();
             rename.setCurrentIndex(current);
         }
-
         if (!tooltipComponents.isEmpty()) {
             tooltipComponents.set(0, Graphics.tooltipOf(rename.getName()));
         }
@@ -76,13 +71,8 @@ public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
     private boolean isNKeyJustPressed() {
         long handle = MinecraftClient.getInstance().getWindow().getHandle();
         if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_N)) {
-            if (!nPressFuse) {
-                nPressFuse = true;
-                return true;
-            }
-        } else {
-            nPressFuse = false;
-        }
+            if (!nPressFuse) { nPressFuse = true; return true; }
+        } else { nPressFuse = false; }
         return false;
     }
 }
