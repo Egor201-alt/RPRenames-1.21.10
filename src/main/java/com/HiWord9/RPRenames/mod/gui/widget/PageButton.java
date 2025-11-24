@@ -1,15 +1,16 @@
 package com.HiWord9.RPRenames.mod.gui.widget;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.input.Click;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.lwjgl.glfw.GLFW;
 
 import static com.HiWord9.RPRenames.mod.util.Util.*;
 
@@ -30,38 +31,41 @@ public class PageButton extends ClickableWidget implements OffsetableWidget {
     final Type type;
 
     public PageButton(RPRWidget instance, int x, int y, Type type) {
-        super(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, null);
+        super(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, Text.empty());
         rprWidget = instance;
-
         this.type = type;
     }
 
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         int u = type == Type.DOWN ? 0 : UP_OFFSET_U;
-        int v = !active ? DISABLED_OFFSET_V : hovered ? FOCUSED_OFFSET_V : 0;
+        int v = !active ? DISABLED_OFFSET_V : isHovered() ? FOCUSED_OFFSET_V : 0;
         
         context.drawTexture(
             RenderPipelines.GUI_TEXTURED, 
             TEXTURE, 
             getX(), getY(), 
-            u, v, 
+            (float)u, (float)v, 
             getWidth(), getHeight(), 
             TEXTURE_WIDTH, TEXTURE_HEIGHT
         );
-        
-        if (!config().disablePageArrowsHints && Screen.hasShiftDown() && active && hovered) {
+
+        long handle = MinecraftClient.getInstance().getWindow().getHandle();
+        boolean shift = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
+
+        if (!config().disablePageArrowsHints && shift && active && isHovered()) {
             String key = "rprenames.gui.page" + (type == Type.DOWN ? "Down.toFirst" : "Up.toLast") + ".tooltip";
             context.drawTooltip(textRenderer(), Text.translatable(key).formatted(Formatting.GRAY), mouseX, mouseY);
         }
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean released) {
-        double mouseX = click.x();
-        double mouseY = click.y();
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (!this.active || !this.visible) return false;
         
-        if (this.isMouseOver(mouseX, mouseY)) {
+        if (this.isMouseOver(mouseX, mouseY) && button == 0) {
+            this.playDownSound(MinecraftClient.getInstance().getSoundManager());
+
             if (type == Type.DOWN) {
                 rprWidget.prevPage();
             } else {
@@ -69,11 +73,17 @@ public class PageButton extends ClickableWidget implements OffsetableWidget {
             }
             return true;
         }
-        return super.mouseClicked(click, released);
+        return false;
     }
 
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
+
+    @Override
+    public void offset(int x, int y) {
+        setX(getX() + x);
+        setY(getY() + y);
+    }
 
     public enum Type {
         DOWN,
