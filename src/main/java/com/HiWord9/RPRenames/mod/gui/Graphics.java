@@ -1,16 +1,20 @@
 package com.HiWord9.RPRenames.mod.gui;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
+import com.HiWord9.RPRenames.mod.gui.widget.GhostCraft;
 import com.HiWord9.RPRenames.mod.gui.widget.external.FavoriteButton;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
-import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.render.DiffuseLighting;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
@@ -23,6 +27,8 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +48,6 @@ public class Graphics {
     public static final int HIGHLIGHT_COLOR_SECOND = 822018303;
 
     static public final int DEFAULT_TEXT_COLOR = 0xFFFFFFFF;
-
-    static public boolean renderTooltipAsFavorite = false;
 
     public static final Identifier FAVORITE_TOOLTIP_FRAME_TEXTURE = Identifier.of(RPRenames.MOD_ID, "favorite_tooltip");
 
@@ -98,8 +102,7 @@ public class Graphics {
         }
 
         if (!(entity instanceof PlayerEntity)) {
-            assert player() != null;
-            entity.age = player().age;
+            if (player() != null) entity.age = player().age;
         }
 
         int centerX = (x1 + x2) / 2;
@@ -107,23 +110,11 @@ public class Graphics {
         int entityY = centerY + (int)(size * 0.4);
 
         if (entity instanceof LivingEntity living) {
-            float originalBodyYaw = living.bodyYaw;
-            float originalYaw = living.getYaw();
-            float originalPitch = living.getPitch();
-            float originalHeadYaw = living.getHeadYaw();
-
-            living.bodyYaw = 180.0F;
-            living.setYaw(180.0F);
-            living.setPitch(0.0F);
-            living.setHeadYaw(living.getYaw());
+            Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
+            Quaternionf q2 = new Quaternionf().rotateX((float) (-Math.PI / 6));
+            rotation.mul(q2);
             
-            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, 0, 0, living);
-            
-            living.bodyYaw = originalBodyYaw;
-            living.setYaw(originalYaw);
-            living.setPitch(originalPitch);
-            living.setHeadYaw(originalHeadYaw);
-            
+            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, 0f, 0f, living);
         } else if (entity instanceof ItemEntity itemEntity) {
             renderStack(context, itemEntity.getStack(), centerX - 8, centerY - 8, 0, (int)size);
         }
@@ -174,21 +165,18 @@ public class Graphics {
             TooltipPositioner positioner,
             boolean favorite
     ) {
-        renderTooltipAsFavorite = favorite;
-        
         try {
-             context.drawTooltip(textRenderer, components, x, y, positioner);
+            context.drawTooltip(textRenderer, components, x, y, positioner);
         } catch (Exception e) {
-            
+            // Fallback
         }
         
-        renderTooltipAsFavorite = false;
+        if (favorite) {
+
+        }
     }
 
     public static void renderStarInFavoriteTooltip(DrawContext context, int x, int y, int width) {
-        MatrixStack matrices = context.getMatrices();
-        matrices.push();
-        matrices.translate(0,0,0);
         context.drawTexture(
                 RenderPipelines.GUI_TEXTURED,
                 FavoriteButton.TEXTURE,
@@ -197,17 +185,17 @@ public class Graphics {
                 FavoriteButton.BUTTON_WIDTH, FavoriteButton.BUTTON_HEIGHT,
                 FavoriteButton.TEXTURE_WIDTH, FavoriteButton.TEXTURE_HEIGHT
         );
-        matrices.pop();
     }
 
     public static <H extends ScreenHandler, S extends HandledScreen<H> & RPRInteractableScreen> void highlightAvailableSlots(
             List<Item> items, DrawContext context, S screen, int color
     ) {
+        if (screen == null || screen.getScreenHandler() == null) return;
         var allSlots = screen.getScreenHandler().slots;
 
         var slotsToHighlight = new ArrayList<Slot>();
         if (!allSlots.isEmpty()) {
-            slotsToHighlight.add(allSlots.getFirst());
+            slotsToHighlight.add(allSlots.get(0));
             if (screen.getCraftSlotsAmount() < allSlots.size()) {
                 slotsToHighlight.addAll(
                         allSlots.subList(screen.getCraftSlotsAmount(), allSlots.size())
@@ -236,7 +224,7 @@ public class Graphics {
     }
 
     public static TooltipComponent tooltipOf(String string) {
-        return tooltipOf(Text.literal(string)); 
+        return TooltipComponent.of(Text.literal(string).asOrderedText());
     }
 
     public static TooltipComponent tooltipOf(Text mutableText) {
