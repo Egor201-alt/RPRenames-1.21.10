@@ -1,11 +1,11 @@
 package com.HiWord9.RPRenames.mod.gui.widget;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.input.Click;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -29,7 +29,7 @@ public class RandomButton extends ClickableWidget implements OffsetableWidget {
     int side;
 
     public RandomButton(RPRWidget instance, int x, int y, int side) {
-        super(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, null);
+        super(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, Text.empty());
         rprWidget = instance;
 
         this.setSide(side);
@@ -45,12 +45,12 @@ public class RandomButton extends ClickableWidget implements OffsetableWidget {
             RenderPipelines.GUI_TEXTURED, 
             TEXTURE, 
             getX(), getY(), 
-            u, v, 
+            (float)u, (float)v, 
             getWidth(), getHeight(), 
             TEXTURE_WIDTH, TEXTURE_HEIGHT
         );
         
-        if (!hovered) return;
+        if (!isHovered()) return;
         context.drawTooltip(textRenderer(), Text.translatable(TOOLTIP_KEY), mouseX, mouseY);
     }
 
@@ -58,11 +58,12 @@ public class RandomButton extends ClickableWidget implements OffsetableWidget {
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
 
     @Override
-    public boolean mouseClicked(Click click, boolean released) {
-        double mouseX = click.x();
-        double mouseY = click.y();
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (!this.active || !this.visible) return false;
 
-        if (this.isMouseOver(mouseX, mouseY)) {
+        if (this.isMouseOver(mouseX, mouseY) && button == 0) {
+            this.playDownSound(MinecraftClient.getInstance().getSoundManager());
+
             int randomNumber = randomNumber();
 
             setSide(randomNumber % SIDES);
@@ -76,10 +77,16 @@ public class RandomButton extends ClickableWidget implements OffsetableWidget {
 
             return true;
         }
-        return super.mouseClicked(click, released);
+        return false;
     }
 
     public void setSide(int side) {
         this.side = side;
+    }
+
+    @Override
+    public void offset(int x, int y) {
+        setX(getX() + x);
+        setY(getY() + y);
     }
 }
