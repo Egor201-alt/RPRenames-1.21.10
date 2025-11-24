@@ -19,6 +19,7 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.Window;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -248,8 +249,8 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
     }
 
     public void prevPage() {
-        long handle = MinecraftClient.getInstance().getWindow().getHandle();
-        boolean shift = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
+        Window window = MinecraftClient.getInstance().getWindow();
+        boolean shift = InputUtil.isKeyPressed(window.getHandle(), GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(window.getHandle(), GLFW.GLFW_KEY_RIGHT_SHIFT);
         openPage(shift ? 0 : page - 1);
     }
 
@@ -452,7 +453,6 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
         return false;
     }
 
-    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!open) return false;
 
