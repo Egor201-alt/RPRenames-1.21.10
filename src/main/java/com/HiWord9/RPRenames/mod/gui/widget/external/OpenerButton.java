@@ -46,7 +46,6 @@ public class OpenerButton extends ClickableWidget implements OffsetableWidget {
         );
     }
 
-    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.active || !this.visible) return false;
 
