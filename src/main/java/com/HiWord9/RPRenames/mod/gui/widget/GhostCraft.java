@@ -132,7 +132,6 @@ public class GhostCraft implements Drawable, Element, Offsetable {
             context.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), color);
         }
 
-        @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             return active && visible && isMouseOver(mouseX, mouseY);
         }
