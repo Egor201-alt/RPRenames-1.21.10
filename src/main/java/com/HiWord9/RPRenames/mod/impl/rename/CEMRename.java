@@ -4,7 +4,6 @@ import com.HiWord9.RPRenames.api.rename.Rename;
 import com.HiWord9.RPRenames.api.rename.renderer.builder.RenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.CEMRenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.util.PropertiesHelper;
-import com.mojang.serialization.Dynamic;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
@@ -15,7 +14,6 @@ import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 
@@ -119,15 +117,11 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
                         try {
                             String jsonName = element.asString();
                             
-                            Text parsedName = null;
                             try {
-                                parsedName = Text.Codecs.CODEC.parse(NbtOps.INSTANCE, element).result().orElse(null);
-                            } catch (Exception e) {
-                                parsedName = Text.literal(jsonName);
-                            }
-
-                            if (parsedName != null) {
-                                name = parsedName;
+                                Text parsed = Text.Serialization.fromJson(jsonName, client().world.getRegistryManager());
+                                if (parsed != null) name = parsed;
+                            } catch (Throwable t) {
+                                name = Text.literal(jsonName);
                             }
                         } catch (Exception ignored) {}
                     }
