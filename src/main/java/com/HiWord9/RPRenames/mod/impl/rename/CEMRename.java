@@ -17,6 +17,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 
+import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -110,7 +111,7 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
             if (entityData != null) {
                 NbtCompound nbt = entityData.copyNbt();
                 
-                if (nbt.contains("CustomName") && nbt.get("CustomName").getType() == NbtElement.STRING_TYPE) { 
+                if (nbt.contains("CustomName")) { 
                    try {
                        String jsonName = nbt.getString("CustomName");
                        
