@@ -121,13 +121,14 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
         this.ghostCraft = ghostCraft;
 
         this.screen = parentScreen;
-        this.configFavorite = config().favorite;
-
+        
+        // this.configFavorite = config().favorite;
+        
         pageDown = new PageButton(
                 this,
                 MENU_START_X + BUTTON_X_OFFSET,
                 PAGE_BUTTONS_Y,
-                PageButton.Type.DOWN
+                PageButton.Type.DOWN 
         );
         pageUp = new PageButton(
                 this,
@@ -424,7 +425,6 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
         if (focusedButton != null) focusedButton.renderTooltip(context, mouseX, mouseY);
     }
 
-    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!open) return false;
 
