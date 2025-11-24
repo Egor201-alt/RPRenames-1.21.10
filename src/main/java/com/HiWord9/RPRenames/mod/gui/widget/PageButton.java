@@ -2,10 +2,11 @@ package com.HiWord9.RPRenames.mod.gui.widget;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.screen.Screen; 
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.input.Click;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -40,7 +41,14 @@ public class PageButton extends ClickableWidget implements OffsetableWidget {
         int u = type == Type.DOWN ? 0 : UP_OFFSET_U;
         int v = !active ? DISABLED_OFFSET_V : hovered ? FOCUSED_OFFSET_V : 0;
         
-        context.drawTexture(TEXTURE, getX(), getY(), u, v, getWidth(), getHeight(), TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        context.drawTexture(
+            RenderPipelines.GUI_TEXTURED, 
+            TEXTURE, 
+            getX(), getY(), 
+            u, v, 
+            getWidth(), getHeight(), 
+            TEXTURE_WIDTH, TEXTURE_HEIGHT
+        );
         
         if (!config().disablePageArrowsHints && Screen.hasShiftDown() && active && hovered) {
             String key = "rprenames.gui.page" + (type == Type.DOWN ? "Down.toFirst" : "Up.toLast") + ".tooltip";
@@ -49,7 +57,7 @@ public class PageButton extends ClickableWidget implements OffsetableWidget {
     }
 
     @Override
-    public boolean mouseClicked(Element.Click click, boolean released) {
+    public boolean mouseClicked(Click click, boolean released) {
         double mouseX = click.x();
         double mouseY = click.y();
         
