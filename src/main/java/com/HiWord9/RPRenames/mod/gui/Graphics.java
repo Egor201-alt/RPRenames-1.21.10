@@ -28,6 +28,7 @@ import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.HiWord9.RPRenames.mod.util.Util.*;
 
@@ -94,11 +95,9 @@ public class Graphics {
         int entityY = centerY + (int)(size * 0.4);
 
         if (entity instanceof LivingEntity living) {
-            Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
-            Quaternionf q2 = new Quaternionf().rotateX((float) (-Math.PI / 6));
-            rotation.mul(q2);
             
-            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, new Vector3f(), rotation, q2, living);
+            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, 0f, 0f, living);
+            
         } else if (entity instanceof ItemEntity itemEntity) {
             renderStack(context, itemEntity.getStack(), centerX - 8, centerY - 8, 0, (int)size);
         }
@@ -126,6 +125,9 @@ public class Graphics {
     public static void drawTooltipWithFixedBorders(DrawContext context, TextRenderer textRenderer, TooltipComponent component, int x, int y, TooltipPositioner positioner, boolean favorite) { 
         TooltipComponent empty = new TooltipComponent() {
         };
+        TooltipComponent emptyReal = new TooltipComponent() {
+        };
+        
         drawTooltip(context, textRenderer, List.of(component), x, y, positioner, favorite); 
     }
 
@@ -133,6 +135,7 @@ public class Graphics {
         renderTooltipAsFavorite = favorite;
         try {
             context.drawTooltip(textRenderer, components, x, y, positioner);
+            
         } catch (Exception e) {
             // Ignored
         }
