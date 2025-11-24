@@ -67,7 +67,7 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
         int v = hovered || (selected && config().highlightSelected) ? FOCUSED_OFFSET_V : 0;
         
         context.drawTexture(
-                RenderLayer::getGui,
+                RenderLayer::getGuiTextured,
                 TEXTURE,
                 getX(), getY(),
                 (float) u, (float) v,
