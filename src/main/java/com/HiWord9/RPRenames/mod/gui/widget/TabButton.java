@@ -46,7 +46,7 @@ public class TabButton extends ClickableWidget implements OffsetableWidget {
         int v = index * TYPE_OFFSET_V;
 
         context.drawTexture(
-            RenderLayer::getGuiTextured,
+            RenderLayer::getGui,
             TEXTURE,
             getX(), getY(),
             (float) u, (float) v,
