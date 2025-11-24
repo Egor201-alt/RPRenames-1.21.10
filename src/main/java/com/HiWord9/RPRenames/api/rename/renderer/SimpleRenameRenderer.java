@@ -34,24 +34,13 @@ public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
 
     @Override
     public void onRender(DrawContext context, int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight) {
-        Graphics.renderStack(
-                context,
-                stack,
-                buttonX + (buttonWidth - Graphics.STACK_IN_SLOT_SIZE) / 2,
-                buttonY + (buttonHeight - Graphics.STACK_IN_SLOT_SIZE) / 2
-        );
+        Graphics.renderStack(context, stack, buttonX + (buttonWidth - Graphics.STACK_IN_SLOT_SIZE) / 2, buttonY + (buttonHeight - Graphics.STACK_IN_SLOT_SIZE) / 2);
     }
 
     @Override
     public void onRenderTooltip(DrawContext context, int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight) {
         updateRenameIndex();
-        Graphics.drawTooltip(
-                context,
-                MinecraftClient.getInstance().textRenderer,
-                tooltipComponents,
-                mouseX, mouseY,
-                HoveredTooltipPositioner.INSTANCE
-        );
+        Graphics.drawTooltip(context, MinecraftClient.getInstance().textRenderer, tooltipComponents, mouseX, mouseY, HoveredTooltipPositioner.INSTANCE);
     }
 
     private boolean nPressFuse = false;
@@ -59,29 +48,22 @@ public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
     protected void updateRenameIndex() {
         List<Text> texts = rename.getNames();
         if (texts.isEmpty()) return;
-
         int current = rename.getCurrentIndex();
-
         if (isNKeyJustPressed()) {
             current = (current + 1) % texts.size();
             rename.setCurrentIndex(current);
         }
-
         if (!tooltipComponents.isEmpty()) {
             tooltipComponents.set(0, Graphics.tooltipOf(rename.getName()));
         }
     }
 
     private boolean isNKeyJustPressed() {
+        // ИСПРАВЛЕНО
         Window window = MinecraftClient.getInstance().getWindow();
         if (InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_N)) {
-            if (!nPressFuse) {
-                nPressFuse = true;
-                return true;
-            }
-        } else {
-            nPressFuse = false;
-        }
+            if (!nPressFuse) { nPressFuse = true; return true; }
+        } else { nPressFuse = false; }
         return false;
     }
 }
