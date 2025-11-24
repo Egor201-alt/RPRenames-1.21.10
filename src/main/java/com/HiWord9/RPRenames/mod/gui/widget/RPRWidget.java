@@ -1,24 +1,23 @@
 package com.HiWord9.RPRenames.mod.gui.widget;
 
-import com.HiWord9.RPRenames.mod.RPRenames;
-import com.HiWord9.RPRenames.mod.gui.RPRInteractableScreen;
-import com.HiWord9.RPRenames.mod.impl.renames_manager.favorite.FavoritesManager;
-import com.HiWord9.RPRenames.mod.gui.Graphics;
-import com.HiWord9.RPRenames.mod.gui.widget.external.FavoriteButton;
-import com.HiWord9.RPRenames.mod.util.RenamesHelper;
 import com.HiWord9.RPRenames.api.RenamesManager;
-import com.HiWord9.RPRenames.mod.util.RenamesSearchEngine;
 import com.HiWord9.RPRenames.api.rename.Rename;
+import com.HiWord9.RPRenames.mod.RPRenames;
+import com.HiWord9.RPRenames.mod.gui.Graphics;
+import com.HiWord9.RPRenames.mod.gui.RPRInteractableScreen;
+import com.HiWord9.RPRenames.mod.gui.widget.external.FavoriteButton;
 import com.HiWord9.RPRenames.mod.impl.rename.CITRename;
+import com.HiWord9.RPRenames.mod.impl.renames_manager.favorite.FavoritesManager;
+import com.HiWord9.RPRenames.mod.util.RenamesHelper;
+import com.HiWord9.RPRenames.mod.util.RenamesSearchEngine;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.render.RenderLayer; 
-import net.minecraft.client.gui.screen.Screen; 
-import net.minecraft.client.input.KeyInput; 
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -339,7 +338,6 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
         checkForInvChanges();
 
         context.drawTexture(
-                RenderLayer::getGuiTextured,
                 MENU_TEXTURE,
                 getX() + MENU_START_X, getY(),
                 0,0,
@@ -396,17 +394,11 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        
+    public boolean mouseClicked(Element.Click click, boolean released) {
         if (!open) return false;
 
         for (Element widget : widgets) {
-            if (widget.mouseClicked(mouseX, mouseY, button)) {
+            if (widget.mouseClicked(click, released)) {
                 if (widget == searchField && currentScreen() != null) {
                     currentScreen().setFocused(searchField);
                 }
@@ -420,16 +412,17 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
             }
         }
         for (RenameButton renameButton : buttons) {
-            if (renameButton.mouseClicked(mouseX, mouseY, button)) return true;
+            if (renameButton.mouseClicked(click, released)) return true;
         }
 
         return false;
     }
     
+    // ИСПРАВЛЕНИЕ: Новый метод keyPressed(KeyInput)
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
         for (Element widget : widgets) {
-            if (widget.keyPressed(keyCode, scanCode, modifiers)) return true;
+            if (widget.keyPressed(input)) return true;
         }
         return false;
     }
