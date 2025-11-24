@@ -15,6 +15,8 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ScreenRect;
+// import net.minecraft.client.gui.input.Click; 
+// import net.minecraft.client.gui.input.KeyInput;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gl.RenderPipelines;
@@ -429,7 +431,7 @@ public class RPRWidget implements Drawable, OffsetableWidget {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!open) return false;
         for (ClickableWidget widget : widgets) {
-            if (widget.mouseClicked(mouseX, mouseY, button)) {
+            if (widget.mouseClicked(new Click(mouseX, mouseY, button), false)) {
                 if (widget == searchField && currentScreen() != null) currentScreen().setFocused(searchField);
                 return true;
             } else if (widget == searchField && currentScreen() != null && currentScreen().getFocused() == searchField && button == 0 && !widget.isMouseOver(mouseX, mouseY)) {
@@ -442,7 +444,9 @@ public class RPRWidget implements Drawable, OffsetableWidget {
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!open) return false;
-        for (ClickableWidget widget : widgets) { if (widget.keyPressed(keyCode, scanCode, modifiers)) return true; }
+        for (ClickableWidget widget : widgets) { 
+            if (widget.keyPressed(new KeyInput(keyCode, scanCode, modifiers))) return true; 
+        }
         return false;
     }
 
