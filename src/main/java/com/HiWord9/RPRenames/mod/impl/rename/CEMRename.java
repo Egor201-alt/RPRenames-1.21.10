@@ -14,7 +14,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registries; 
 import net.minecraft.text.Text;
 
 import java.util.Objects;
