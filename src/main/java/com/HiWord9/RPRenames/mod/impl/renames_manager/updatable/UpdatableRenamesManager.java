@@ -39,10 +39,9 @@ public class UpdatableRenamesManager extends RenamesManagerImpl<Rename> implemen
 
         long finishTime = System.currentTimeMillis() - startTime;
         String ms = String.valueOf(finishTime % 1000);
-        switch (ms.length()) {
-            case 1 -> ms = "00" + ms;
-            case 2 -> ms = "0" + ms;
-        }
+        if (ms.length() == 1) ms = "00" + ms;
+        else if (ms.length() == 2) ms = "0" + ms;
+        
         RPRenames.LOGGER.info(
                 "Finished collecting resource pack renames [{}.{}s] ({} in total)",
                 finishTime / 1000, ms, getAllRenames().size()
@@ -52,9 +51,16 @@ public class UpdatableRenamesManager extends RenamesManagerImpl<Rename> implemen
     }
 
     @Override
-    public CompletableFuture<Void> reload(Synchronizer synchronizer, ResourceManager manager, Executor prepareExecutor, Executor applyExecutor) {
+    public CompletableFuture<Void> reload(
+            Synchronizer synchronizer, 
+            ResourceManager manager, 
+            Profiler prepareProfiler, 
+            Profiler applyProfiler, 
+            Executor prepareExecutor, 
+            Executor applyExecutor
+    ) {
         return CompletableFuture.supplyAsync(() -> {
-            if (config().updateConfig) updateRenames(manager, Profilers.get());
+            if (config().updateConfig) updateRenames(manager, prepareProfiler);
             return null;
         }, prepareExecutor).thenCompose(synchronizer::whenPrepared).thenAcceptAsync(o -> {}, applyExecutor);
     }
