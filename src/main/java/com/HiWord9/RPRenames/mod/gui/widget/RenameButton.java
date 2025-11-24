@@ -99,22 +99,19 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-
         if (!this.active || !this.visible) return false;
-
         if (!this.isMouseOver(mouseX, mouseY)) return false;
 
-        if (button == 1) {
+        if (button == 1) { // Right click
             this.playDownSound(MinecraftClient.getInstance().getSoundManager());
-            
             List<Item> items;
+
             if (rprWidget.getCurrentTab().forCraftItemOnly) items = List.of(rprWidget.getCraftItem());
             else items = List.copyOf(rename.getItems());
 
             rprWidget.addOrRemoveFavorite(!favorite, items, rename.getName().getString());
             return true;
-        } 
-        else if (button == 0) {
+        } else if (button == 0) { // Left click
             this.playDownSound(MinecraftClient.getInstance().getSoundManager());
             rprWidget.doRename(rename);
             return true;
