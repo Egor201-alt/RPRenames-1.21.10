@@ -215,7 +215,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         int yScreenOffset = screen.y;
         
         var matrices = context.getMatrices(); // Safe inference
-        pushMatrix();
+        matrices.pushMatrix();
         matrices.translate(-xScreenOffset, -yScreenOffset, 0);
 
         opener.render(context, mouseX, mouseY, 0);
@@ -223,7 +223,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         ghostCraft.render(context, mouseX, mouseY, 0);
         rprWidget.render(context, mouseX, mouseY, 0);
 
-        popMatrix();
+        matrices.popMatrix();
     }
 
     @Override
