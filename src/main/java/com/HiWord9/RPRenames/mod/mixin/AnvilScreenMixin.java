@@ -13,7 +13,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack; 
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
@@ -54,7 +54,6 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         if (shouldNotModify() || init) return;
         init = true;
 
-        // Безопасное приведение типов
         AnvilScreen screen = (AnvilScreen) (Object) this;
         int x = screen.x;
         int y = screen.y;
@@ -120,15 +119,23 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;isActive()Z"), method = "keyPressed")
     private boolean onKeyPressedNameFieldIsActive(TextFieldWidget instance, int keyCode, int scanCode, int modifiers) {
         if (shouldNotModify()) return instance.isActive();
-
+        
         return rprWidget.keyPressed(keyCode, scanCode, modifiers)
                 || rprWidget.searchField.isActive()
                 || instance.isActive();
     }
+    
+    @Inject(at = @At("HEAD"), method = "mouseClicked", cancellable = true)
+    public void onMouseClickedInject(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
+        
+        if (shouldNotModify()) return;
+        
+        if (myMouseClicked(mouseX, mouseY, button)) {
+            cir.setReturnValue(true);
+        }
+    }
 
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (shouldNotModify()) return super.mouseClicked(mouseX, mouseY, button);
+    public boolean myMouseClicked(double mouseX, double mouseY, int button) {
         afterPutInAnvilFirst = false;
         afterPutInAnvilSecond = false;
         
@@ -144,7 +151,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         }
         if (rprWidget.mouseClicked(mouseX, mouseY, button)) return true;
         
-        return super.mouseClicked(mouseX, mouseY, button);
+        return false;
     }
 
     @Inject(at = @At("HEAD"), method = "onSlotUpdate", cancellable = true)
@@ -206,8 +213,8 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         AnvilScreen screen = (AnvilScreen) client.currentScreen;
         int xScreenOffset = screen.x;
         int yScreenOffset = screen.y;
-
-        MatrixStack matrices = context.getMatrices();
+        
+        var matrices = context.getMatrices(); // Safe inference
         matrices.push();
         matrices.translate(-xScreenOffset, -yScreenOffset, 0);
 
