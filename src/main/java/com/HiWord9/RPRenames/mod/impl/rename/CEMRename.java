@@ -7,7 +7,7 @@ import com.HiWord9.RPRenames.mod.util.PropertiesHelper;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EntityType; 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
