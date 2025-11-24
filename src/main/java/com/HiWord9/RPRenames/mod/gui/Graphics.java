@@ -2,29 +2,29 @@ package com.HiWord9.RPRenames.mod.gui;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.gui.widget.external.FavoriteButton;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.SquidEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.joml.*;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
-import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,12 +64,14 @@ public class Graphics {
 
     public static void renderStack(DrawContext context, ItemStack itemStack, int x, int y, int z, int size) {
         float scale = size != STACK_IN_SLOT_SIZE ? ((float) size / STACK_IN_SLOT_SIZE) : 1f;
-        Matrix3x2fStack matrices = context.getMatrices();
-        matrices.pushMatrix();
-        matrices.translate(x, y);
-        matrices.scale(scale, scale);
-        context.drawItemWithoutEntity(itemStack, 0, 0, z);
-        matrices.popMatrix();
+
+        MatrixStack matrices = context.getMatrices();
+        matrices.push(); // pushMatrix -> push
+        matrices.translate(x, y, z);
+        matrices.scale(scale, scale, 1.0f);
+        
+        context.drawItem(itemStack, 0, 0); 
+        matrices.pop(); // popMatrix -> pop
     }
 
     public static void renderEntityInBox(DrawContext context, ScreenRect rect, int size, Entity entity, boolean spin) {
@@ -93,10 +95,6 @@ public class Graphics {
 
         if (entity instanceof LivingEntity l && l.isBaby()) size /= 1.7;
 
-        Quaternionf entityRotation = new Quaternionf().rotateZ((float) Math.PI);
-        Quaternionf pitchRotation = new Quaternionf().rotateX(-10.f * 0.017453292F);
-        entityRotation.mul(pitchRotation);
-
         var camera = client().getCameraEntity();
         if (camera != null) {
             entity.setPos(camera.getX(), camera.getY(), camera.getZ());
@@ -106,22 +104,22 @@ public class Graphics {
             assert player() != null;
             entity.age = player().age;
         }
-        setupAngles(entity, spin);
 
-        Vector3f vector3f = new Vector3f(0.0F, entity.getHeight() / 2.0F, 0.0F);
-        var entityRenderDispatcher = client().getEntityRenderDispatcher();
-        EntityRenderer<? super Entity, ?> entityRenderer = entityRenderDispatcher.getRenderer(entity);
-        EntityRenderState entityRenderState = entityRenderer.getAndUpdateRenderState(entity, 1.0F);
-        entityRenderState.hitbox = null;
-        context.addEntity(entityRenderState, (float) size, vector3f, entityRotation, pitchRotation, x1, y1, x2, y2);
-    }
-
-    private static void setupAngles(Entity entity, boolean spin) {
         float yaw = spin ? (float) (((System.currentTimeMillis() / 10)) % 360) : 225.0F;
-        entity.setYaw(yaw);
-        entity.setHeadYaw(yaw);
-        entity.setPitch(0.f);
-        if (entity instanceof LivingEntity living) living.bodyYaw = yaw;
+        float mouseX = (float) Math.sin(Math.toRadians(yaw)) * 100f;
+        float mouseY = 0f;
+
+        int centerX = (x1 + x2) / 2;
+        int centerY = (y1 + y2) / 2;
+
+        int entityY = centerY + (int)(size * 0.4); 
+
+        if (entity instanceof LivingEntity living) {
+            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, -mouseX, mouseY, living);
+        } 
+        else if (entity instanceof ItemEntity itemEntity) {
+            renderStack(context, itemEntity.getStack(), centerX - 8, centerY - 8, 0, (int)size);
+        }
     }
 
     public static void drawTooltip(
@@ -170,22 +168,24 @@ public class Graphics {
             boolean favorite
     ) {
         renderTooltipAsFavorite = favorite;
-        context.drawTooltip(textRenderer, components, x, y, positioner, null, false);
+        context.drawTooltip(textRenderer, components, x, y, positioner, null);
         renderTooltipAsFavorite = false;
     }
 
     public static void renderStarInFavoriteTooltip(DrawContext context, int x, int y, int width) {
-        context.getMatrices().pushMatrix();
-        context.getMatrices().translate(0,0);
+        MatrixStack matrices = context.getMatrices();
+        matrices.push();
+        matrices.translate(0,0,0);
+        
         context.drawTexture(
-                RenderPipelines.GUI_TEXTURED,
+                RenderLayer::getGuiTextured,
                 FavoriteButton.TEXTURE,
                 x + width - (FavoriteButton.BUTTON_WIDTH), y,
                 0, 0,
                 FavoriteButton.BUTTON_WIDTH, FavoriteButton.BUTTON_HEIGHT,
                 FavoriteButton.TEXTURE_WIDTH, FavoriteButton.TEXTURE_HEIGHT
         );
-        context.getMatrices().popMatrix();
+        matrices.pop();
     }
 
     public static <H extends ScreenHandler, S extends HandledScreen<H> & RPRInteractableScreen> void highlightAvailableSlots(
@@ -194,10 +194,14 @@ public class Graphics {
         var allSlots = screen.getScreenHandler().slots;
 
         var slotsToHighlight = new ArrayList<Slot>();
-        slotsToHighlight.add(allSlots.getFirst());
-        slotsToHighlight.addAll(
-                allSlots.subList(screen.getCraftSlotsAmount(), allSlots.size())
-        );
+        if (!allSlots.isEmpty()) {
+            slotsToHighlight.add(allSlots.getFirst());
+            if (screen.getCraftSlotsAmount() < allSlots.size()) {
+                slotsToHighlight.addAll(
+                        allSlots.subList(screen.getCraftSlotsAmount(), allSlots.size())
+                );
+            }
+        }
 
         highlightSlots(items, slotsToHighlight, context, screen.x, screen.y, color);
     }
