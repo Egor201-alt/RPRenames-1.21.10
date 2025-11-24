@@ -1,20 +1,16 @@
 package com.HiWord9.RPRenames.mod.gui;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
-import com.HiWord9.RPRenames.mod.gui.widget.GhostCraft;
 import com.HiWord9.RPRenames.mod.gui.widget.external.FavoriteButton;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
@@ -49,6 +45,8 @@ public class Graphics {
 
     static public final int DEFAULT_TEXT_COLOR = 0xFFFFFFFF;
 
+    public static boolean renderTooltipAsFavorite = false;
+
     public static final Identifier FAVORITE_TOOLTIP_FRAME_TEXTURE = Identifier.of(RPRenames.MOD_ID, "favorite_tooltip");
 
     public static void renderText(DrawContext context, Text text, int x, int y, boolean shadow, boolean centered) {
@@ -67,7 +65,8 @@ public class Graphics {
 
     public static void renderStack(DrawContext context, ItemStack itemStack, int x, int y, int z, int size) {
         float scale = size != STACK_IN_SLOT_SIZE ? ((float) size / STACK_IN_SLOT_SIZE) : 1f;
-        MatrixStack matrices = context.getMatrices();
+        
+        var matrices = context.getMatrices();
         matrices.push();
         matrices.translate(x, y, z);
         matrices.scale(scale, scale, 1.0f);
@@ -113,8 +112,9 @@ public class Graphics {
             Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
             Quaternionf q2 = new Quaternionf().rotateX((float) (-Math.PI / 6));
             rotation.mul(q2);
+
+            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, 0, 0f, null, rotation, null, living);
             
-            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, 0f, 0f, living);
         } else if (entity instanceof ItemEntity itemEntity) {
             renderStack(context, itemEntity.getStack(), centerX - 8, centerY - 8, 0, (int)size);
         }
@@ -165,15 +165,13 @@ public class Graphics {
             TooltipPositioner positioner,
             boolean favorite
     ) {
+        renderTooltipAsFavorite = favorite;
         try {
             context.drawTooltip(textRenderer, components, x, y, positioner);
         } catch (Exception e) {
             // Fallback
         }
-        
-        if (favorite) {
-
-        }
+        renderTooltipAsFavorite = false;
     }
 
     public static void renderStarInFavoriteTooltip(DrawContext context, int x, int y, int width) {
