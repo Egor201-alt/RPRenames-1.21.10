@@ -7,6 +7,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -58,21 +59,29 @@ public class SimpleRenameRenderer<T extends Rename> implements RenameRenderer {
     protected void updateRenameIndex() {
         List<Text> texts = rename.getNames();
         if (texts.isEmpty()) return;
+
         int current = rename.getCurrentIndex();
+
         if (isNKeyJustPressed()) {
             current = (current + 1) % texts.size();
             rename.setCurrentIndex(current);
         }
+
         if (!tooltipComponents.isEmpty()) {
             tooltipComponents.set(0, Graphics.tooltipOf(rename.getName()));
         }
     }
 
     private boolean isNKeyJustPressed() {
-        long handle = MinecraftClient.getInstance().getWindow().getHandle();
-        if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_N)) {
-            if (!nPressFuse) { nPressFuse = true; return true; }
-        } else { nPressFuse = false; }
+        Window window = MinecraftClient.getInstance().getWindow();
+        if (InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_N)) {
+            if (!nPressFuse) {
+                nPressFuse = true;
+                return true;
+            }
+        } else {
+            nPressFuse = false;
+        }
         return false;
     }
 }
