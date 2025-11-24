@@ -9,6 +9,7 @@ import com.HiWord9.RPRenames.mod.gui.tooltip_component.preview.PlayerPreviewTool
 import com.HiWord9.RPRenames.mod.gui.widget.RPRWidget;
 import com.HiWord9.RPRenames.mod.gui.widget.RPRWidget.Tab;
 import com.HiWord9.RPRenames.mod.impl.rename.CITRename;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -28,7 +29,6 @@ import java.util.function.Supplier;
 import static com.HiWord9.RPRenames.mod.gui.Graphics.tooltipOf;
 import static com.HiWord9.RPRenames.mod.util.RenameRendererHelper.*;
 import static com.HiWord9.RPRenames.mod.util.Util.*;
-import static net.minecraft.client.gui.screen.Screen.hasShiftDown;
 
 public class CITRenameRenderer extends SimpleRenameRenderer<CITRename> implements RenameRenderer.Preview {
     private static final MutableText playerPreviewHintShift = Text.translatable(
@@ -219,7 +219,8 @@ public class CITRenameRenderer extends SimpleRenameRenderer<CITRename> implement
         ArrayList<TooltipComponent> tooltipAddition = new ArrayList<>();
 
         if (config().enablePreview) {
-            boolean shiftDown = hasShiftDown();
+            long handle = MinecraftClient.getInstance().getWindow().getHandle();
+            boolean shiftDown = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
 
             if (!shiftDown && !config().playerPreviewByDefault) {
                 if (!config().disableTooltipHints) tooltipAddition.add(tooltipOf(playerPreviewHintShift));
@@ -254,7 +255,10 @@ public class CITRenameRenderer extends SimpleRenameRenderer<CITRename> implement
 
     @Override
     public void drawPreview(DrawContext context, int mouseX, int mouseY, List<TooltipComponent> mainTooltip) {
-        boolean shouldPreviewPlayer = hasShiftDown() != config().playerPreviewByDefault;
+        long handle = MinecraftClient.getInstance().getWindow().getHandle();
+        boolean shiftDown = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
+        
+        boolean shouldPreviewPlayer = shiftDown != config().playerPreviewByDefault;
         TooltipPositioner positioner = new PreviewTooltipPositioner(mainTooltip);
 
         if (shouldPreviewPlayer) {
