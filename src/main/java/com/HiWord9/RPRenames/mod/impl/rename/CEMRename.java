@@ -17,7 +17,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 
-import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -114,15 +113,18 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
                 if (nbt.contains("CustomName") && nbt.get("CustomName").getType() == NbtElement.STRING_TYPE) { 
                    try {
                        String jsonName = nbt.getString("CustomName");
-                       Text parsedName = Text.Serialization.fromJson(jsonName, client().world.getRegistryManager());
+                       
+                       Text parsedName = null;
+                       try {
+                           parsedName = Text.Serializer.fromJson(jsonName, client().world.getRegistryManager());
+                       } catch (Throwable t) {
+                           parsedName = Text.literal(jsonName);
+                       }
+
                        if (parsedName != null) {
                            name = parsedName;
                        }
-                   } catch (Throwable t) {
-                       try {
-                           name = Text.literal(nbt.getString("CustomName"));
-                       } catch (Exception ignored) {}
-                   }
+                   } catch (Exception ignored) {}
                 }
             }
 
