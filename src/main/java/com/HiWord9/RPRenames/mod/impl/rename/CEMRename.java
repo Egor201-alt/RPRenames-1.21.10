@@ -14,8 +14,10 @@ import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 
 import java.util.Objects;
 import java.util.Properties;
@@ -116,12 +118,22 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
                     if (element != null && element.getType() == NbtElement.STRING_TYPE) {
                         try {
                             String jsonName = element.asString();
-                            
+                            Text parsedName = null;
+
                             try {
-                                Text parsed = Text.Serialization.fromJson(jsonName, client().world.getRegistryManager());
-                                if (parsed != null) name = parsed;
-                            } catch (Throwable t) {
-                                name = Text.literal(jsonName);
+                                parsedName = TextCodecs.CODEC.parse(NbtOps.INSTANCE, element).result().orElse(null);
+                            } catch (Exception e) {
+                                try {
+                                     parsedName = Text.Codecs.CODEC.parse(NbtOps.INSTANCE, element).result().orElse(null);
+                                } catch (Exception ignored2) {}
+                            }
+
+                            if (parsedName == null) {
+                                parsedName = Text.literal(jsonName);
+                            }
+
+                            if (parsedName != null) {
+                                name = parsedName;
                             }
                         } catch (Exception ignored) {}
                     }
