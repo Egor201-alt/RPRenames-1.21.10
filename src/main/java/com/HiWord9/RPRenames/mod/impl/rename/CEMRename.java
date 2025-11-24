@@ -4,17 +4,19 @@ import com.HiWord9.RPRenames.api.rename.Rename;
 import com.HiWord9.RPRenames.api.rename.renderer.builder.RenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.CEMRenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.util.PropertiesHelper;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.EntityType; 
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.registry.Registries; 
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 
 import java.util.Objects;
@@ -111,21 +113,24 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
             if (entityData != null) {
                 NbtCompound nbt = entityData.copyNbt();
                 
-                if (nbt.contains("CustomName")) { 
-                   try {
-                       String jsonName = nbt.getString("CustomName");
-                       
-                       Text parsedName = null;
-                       try {
-                           parsedName = Text.Serializer.fromJson(jsonName, client().world.getRegistryManager());
-                       } catch (Throwable t) {
-                           parsedName = Text.literal(jsonName);
-                       }
+                if (nbt.contains("CustomName")) {
+                    NbtElement element = nbt.get("CustomName");
+                    if (element != null && element.getType() == NbtElement.STRING_TYPE) {
+                        try {
+                            String jsonName = element.asString();
+                            
+                            Text parsedName = null;
+                            try {
+                                parsedName = Text.Codecs.CODEC.parse(NbtOps.INSTANCE, element).result().orElse(null);
+                            } catch (Exception e) {
+                                parsedName = Text.literal(jsonName);
+                            }
 
-                       if (parsedName != null) {
-                           name = parsedName;
-                       }
-                   } catch (Exception ignored) {}
+                            if (parsedName != null) {
+                                name = parsedName;
+                            }
+                        } catch (Exception ignored) {}
+                    }
                 }
             }
 
