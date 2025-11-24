@@ -1,7 +1,7 @@
 package com.HiWord9.RPRenames.mod.gui.widget;
 
 import com.HiWord9.RPRenames.api.rename.Rename;
-import com.HiWord9.RPRenames.api.rename.renderer.RenameRenderer; 
+import com.HiWord9.RPRenames.api.rename.renderer.RenameRenderer;
 import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.gui.Graphics;
 import com.HiWord9.RPRenames.mod.gui.RPRInteractableScreen;
@@ -12,6 +12,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.item.Item;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
@@ -66,12 +67,14 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
         int v = hovered || (selected && config().highlightSelected) ? FOCUSED_OFFSET_V : 0;
         
         context.drawTexture(
+                RenderLayer::getGuiTextured,
                 TEXTURE,
                 getX(), getY(),
                 (float) u, (float) v,
                 getWidth(), getHeight(),
                 TEXTURE_WIDTH, TEXTURE_HEIGHT
         );
+        
         renameRenderer.onRender(
                 context,
                 mouseX, mouseY,
@@ -100,18 +103,20 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.active || !this.visible) return false;
+
         if (!this.isMouseOver(mouseX, mouseY)) return false;
 
-        if (button == 1) { // Right click
+        if (button == 1) {
             this.playDownSound(MinecraftClient.getInstance().getSoundManager());
+            
             List<Item> items;
-
             if (rprWidget.getCurrentTab().forCraftItemOnly) items = List.of(rprWidget.getCraftItem());
             else items = List.copyOf(rename.getItems());
 
             rprWidget.addOrRemoveFavorite(!favorite, items, rename.getName().getString());
             return true;
-        } else if (button == 0) { // Left click
+        } 
+        else if (button == 0) {
             this.playDownSound(MinecraftClient.getInstance().getSoundManager());
             rprWidget.doRename(rename);
             return true;
