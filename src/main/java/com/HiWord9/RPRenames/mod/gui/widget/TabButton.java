@@ -7,7 +7,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -46,10 +45,9 @@ public class TabButton extends ClickableWidget implements OffsetableWidget {
         int v = index * TYPE_OFFSET_V;
         
         context.drawTexture(
-            RenderLayer::getGuiTextured, 
             TEXTURE, 
             getX(), getY(), 
-            u, v, 
+            (float) u, (float) v, 
             getWidth(), getHeight(), 
             TEXTURE_WIDTH, TEXTURE_HEIGHT
         );
