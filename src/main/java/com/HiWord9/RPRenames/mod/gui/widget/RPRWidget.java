@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static com.HiWord9.RPRenames.mod.util.Util.*;
 
-public class RPRWidget implements Drawable, Element, OffsetableWidget {
+public class RPRWidget implements Drawable, OffsetableWidget {
     protected static Identifier MENU_TEXTURE = Identifier.of(RPRenames.MOD_ID, "textures/gui/menu.png");
 
     public static final int MENU_TEXTURE_WIDTH = 147;
@@ -446,10 +446,8 @@ public class RPRWidget implements Drawable, Element, OffsetableWidget {
         return false;
     }
 
-    @Override
     public void setFocused(boolean focused) {}
 
-    @Override
     public boolean isFocused() { return false; }
 
     protected void checkForInvChanges() {
