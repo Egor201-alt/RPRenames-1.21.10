@@ -5,7 +5,7 @@ import com.HiWord9.RPRenames.api.rename.renderer.builder.RenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.CEMRenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.util.PropertiesHelper;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.CustomData;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -86,7 +86,12 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
         if (spawnEggItem == null) {
             NbtCompound nbtName = new NbtCompound();
             nbtName.putString("id", Registries.ENTITY_TYPE.getId(this.getEntity()).toString());
-            stack.set(DataComponentTypes.ENTITY_DATA, CustomData.of(nbtName));
+            
+            try {
+                stack.set(DataComponentTypes.ENTITY_DATA, NbtComponent.of(nbtName));
+            } catch (Exception e) {
+                
+            }
         }
         return stack;
     }
@@ -103,11 +108,21 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
             var entityData = stack.get(DataComponentTypes.ENTITY_DATA);
             if (entityData != null) {
                 NbtCompound nbt = entityData.copyNbt();
-                
-                if (nbt.contains("CustomName", NbtElement.STRING_TYPE)) { 
+
+                if (nbt.contains("CustomName") && nbt.getType("CustomName") == NbtElement.STRING_TYPE) { 
                    try {
                        String jsonName = nbt.getString("CustomName");
-                       Text parsedName = Text.Serialization.fromJson(jsonName, client().world.getRegistryManager());
+                       
+                       Text parsedName = Text.TextCodecs.CODEC.parse(net.minecraft.registry.DynamicOps.of(net.minecraft.nbt.NbtOps.INSTANCE, nbt.get("CustomName"))).result().orElse(null);
+                       
+                       if (parsedName == null) {
+                            try {
+                                parsedName = Text.Serializer.fromJson(jsonName, client().world.getRegistryManager());
+                            } catch (Throwable t) {
+                                parsedName = Text.of(jsonName);
+                            }
+                       }
+                       
                        if (parsedName != null) {
                            name = parsedName;
                        }
