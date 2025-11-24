@@ -69,7 +69,7 @@ public class TabButton extends ClickableWidget implements OffsetableWidget {
             return false;
         }
 
-        if (this.isValidClickButton(button) && this.isMouseOver(mouseX, mouseY)) {
+        if (button == 0 && this.isMouseOver(mouseX, mouseY)) {
             this.playDownSound(MinecraftClient.getInstance().getSoundManager());
             
             if (rprWidget.getCurrentTab() != tab) {
