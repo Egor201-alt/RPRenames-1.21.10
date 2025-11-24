@@ -66,7 +66,7 @@ public class Graphics {
     public static void renderStack(DrawContext context, ItemStack itemStack, int x, int y, int z, int size) {
         float scale = size != STACK_IN_SLOT_SIZE ? ((float) size / STACK_IN_SLOT_SIZE) : 1f;
         
-        var matrices = context.getMatrices();
+        MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.translate(x, y, z);
         matrices.scale(scale, scale, 1.0f);
@@ -109,11 +109,23 @@ public class Graphics {
         int entityY = centerY + (int)(size * 0.4);
 
         if (entity instanceof LivingEntity living) {
-            Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
-            Quaternionf q2 = new Quaternionf().rotateX((float) (-Math.PI / 6));
-            rotation.mul(q2);
+            
+            float originalBodyYaw = living.bodyYaw;
+            float originalYaw = living.getYaw();
+            float originalPitch = living.getPitch();
+            float originalHeadYaw = living.getHeadYaw();
 
-            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, 0, 0f, null, rotation, null, living);
+            living.bodyYaw = 180.0F;
+            living.setYaw(180.0F);
+            living.setPitch(0.0F);
+            living.setHeadYaw(living.getYaw());
+            
+            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, 0f, 0f, living);
+
+            living.bodyYaw = originalBodyYaw;
+            living.setYaw(originalYaw);
+            living.setPitch(originalPitch);
+            living.setHeadYaw(originalHeadYaw);
             
         } else if (entity instanceof ItemEntity itemEntity) {
             renderStack(context, itemEntity.getStack(), centerX - 8, centerY - 8, 0, (int)size);
@@ -169,7 +181,7 @@ public class Graphics {
         try {
             context.drawTooltip(textRenderer, components, x, y, positioner);
         } catch (Exception e) {
-            // Fallback
+            //
         }
         renderTooltipAsFavorite = false;
     }
