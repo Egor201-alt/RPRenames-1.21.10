@@ -2,6 +2,7 @@ package com.HiWord9.RPRenames.mod.gui;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.gui.widget.external.FavoriteButton;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
@@ -9,7 +10,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
@@ -22,8 +23,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,16 +102,28 @@ public class Graphics {
             entity.age = player().age;
         }
 
-        float yaw = spin ? (float) (((System.currentTimeMillis() / 10)) % 360) : 225.0F;
-        float mouseX = (float) Math.sin(Math.toRadians(yaw)) * 100f;
-        float mouseY = 0f;
-
         int centerX = (x1 + x2) / 2;
         int centerY = (y1 + y2) / 2;
         int entityY = centerY + (int)(size * 0.4);
 
         if (entity instanceof LivingEntity living) {
-            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, new Vector3f(), new Quaternionf().rotateZ((float) Math.PI), null, living);
+            float originalBodyYaw = living.bodyYaw;
+            float originalYaw = living.getYaw();
+            float originalPitch = living.getPitch();
+            float originalHeadYaw = living.getHeadYaw();
+
+            living.bodyYaw = 180.0F;
+            living.setYaw(180.0F);
+            living.setPitch(0.0F);
+            living.setHeadYaw(living.getYaw());
+            
+            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, 0, 0, living);
+            
+            living.bodyYaw = originalBodyYaw;
+            living.setYaw(originalYaw);
+            living.setPitch(originalPitch);
+            living.setHeadYaw(originalHeadYaw);
+            
         } else if (entity instanceof ItemEntity itemEntity) {
             renderStack(context, itemEntity.getStack(), centerX - 8, centerY - 8, 0, (int)size);
         }
@@ -164,8 +175,13 @@ public class Graphics {
             boolean favorite
     ) {
         renderTooltipAsFavorite = favorite;
-
-        context.drawTooltip(textRenderer, components, x, y, positioner, null);
+        
+        try {
+             context.drawTooltip(textRenderer, components, x, y, positioner);
+        } catch (Exception e) {
+            
+        }
+        
         renderTooltipAsFavorite = false;
     }
 
@@ -174,10 +190,10 @@ public class Graphics {
         matrices.push();
         matrices.translate(0,0,0);
         context.drawTexture(
-                RenderLayer::getGuiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 FavoriteButton.TEXTURE,
                 x + width - (FavoriteButton.BUTTON_WIDTH), y,
-                0, 0,
+                0f, 0f,
                 FavoriteButton.BUTTON_WIDTH, FavoriteButton.BUTTON_HEIGHT,
                 FavoriteButton.TEXTURE_WIDTH, FavoriteButton.TEXTURE_HEIGHT
         );
@@ -220,7 +236,7 @@ public class Graphics {
     }
 
     public static TooltipComponent tooltipOf(String string) {
-        return tooltipOf(Text.literal(string)); // Text.of -> Text.literal
+        return tooltipOf(Text.literal(string)); 
     }
 
     public static TooltipComponent tooltipOf(Text mutableText) {
