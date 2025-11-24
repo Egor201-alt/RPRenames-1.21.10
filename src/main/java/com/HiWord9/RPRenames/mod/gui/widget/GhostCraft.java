@@ -1,6 +1,7 @@
 package com.HiWord9.RPRenames.mod.gui.widget;
 
 import com.HiWord9.RPRenames.mod.gui.Graphics;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
@@ -8,6 +9,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 
 import static com.HiWord9.RPRenames.mod.gui.Graphics.*;
 import static com.HiWord9.RPRenames.mod.util.Util.*;
@@ -103,7 +105,7 @@ public class GhostCraft implements Drawable, Element, Offsetable {
         }
 
         protected GhostSlot(int x, int y, int size) {
-            super(x, y, size, size, null);
+            super(x, y, size, size, Text.empty());
         }
 
         public void setForceHighlight(boolean forceHighlight) {
@@ -119,7 +121,7 @@ public class GhostCraft implements Drawable, Element, Offsetable {
             if (content != null && !content.isEmpty()) {
                 Graphics.renderStack(context, content, getX() + 1, getY() + 1);
                 if (isMouseOver(mouseX, mouseY)) {
-                    context.drawTooltip(textRenderer(), Screen.getTooltipFromItem(client(), content), mouseX, mouseY);
+                    context.drawTooltip(MinecraftClient.getInstance().textRenderer, Screen.getTooltipFromItem(MinecraftClient.getInstance(), content), mouseX, mouseY);
                 }
             }
             int color;
@@ -146,5 +148,11 @@ public class GhostCraft implements Drawable, Element, Offsetable {
 
         @Override
         protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
+
+        @Override
+        public void offset(int x, int y) {
+            setX(getX() + x);
+            setY(getY() + y);
+        }
     }
 }
