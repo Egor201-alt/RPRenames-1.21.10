@@ -2,7 +2,6 @@ package com.HiWord9.RPRenames.mod.gui;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.gui.widget.external.FavoriteButton;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
@@ -16,6 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.SquidEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
@@ -64,14 +64,12 @@ public class Graphics {
 
     public static void renderStack(DrawContext context, ItemStack itemStack, int x, int y, int z, int size) {
         float scale = size != STACK_IN_SLOT_SIZE ? ((float) size / STACK_IN_SLOT_SIZE) : 1f;
-
         MatrixStack matrices = context.getMatrices();
-        matrices.push(); // pushMatrix -> push
+        matrices.push();
         matrices.translate(x, y, z);
         matrices.scale(scale, scale, 1.0f);
-        
-        context.drawItem(itemStack, 0, 0); 
-        matrices.pop(); // popMatrix -> pop
+        context.drawItem(itemStack, 0, 0);
+        matrices.pop();
     }
 
     public static void renderEntityInBox(DrawContext context, ScreenRect rect, int size, Entity entity, boolean spin) {
@@ -111,13 +109,11 @@ public class Graphics {
 
         int centerX = (x1 + x2) / 2;
         int centerY = (y1 + y2) / 2;
-
-        int entityY = centerY + (int)(size * 0.4); 
+        int entityY = centerY + (int)(size * 0.4);
 
         if (entity instanceof LivingEntity living) {
-            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, -mouseX, mouseY, living);
-        } 
-        else if (entity instanceof ItemEntity itemEntity) {
+            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, new Vector3f(), new Quaternionf().rotateZ((float) Math.PI), null, living);
+        } else if (entity instanceof ItemEntity itemEntity) {
             renderStack(context, itemEntity.getStack(), centerX - 8, centerY - 8, 0, (int)size);
         }
     }
@@ -151,8 +147,8 @@ public class Graphics {
         drawTooltip(
                 context, textRenderer,
                 List.of(component,
-                        new TooltipComponent() { //dump tooltip component to increase list size
-                            public int getHeight(TextRenderer textRenderer) {return 0;}
+                        new TooltipComponent() {
+                            public int getHeight() {return 0;}
                             public int getWidth(TextRenderer textRenderer) {return 0;}
                         }
                 ),
@@ -168,6 +164,7 @@ public class Graphics {
             boolean favorite
     ) {
         renderTooltipAsFavorite = favorite;
+
         context.drawTooltip(textRenderer, components, x, y, positioner, null);
         renderTooltipAsFavorite = false;
     }
@@ -176,7 +173,6 @@ public class Graphics {
         MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.translate(0,0,0);
-        
         context.drawTexture(
                 RenderLayer::getGuiTextured,
                 FavoriteButton.TEXTURE,
@@ -224,7 +220,7 @@ public class Graphics {
     }
 
     public static TooltipComponent tooltipOf(String string) {
-        return tooltipOf(Text.of(string));
+        return tooltipOf(Text.literal(string)); // Text.of -> Text.literal
     }
 
     public static TooltipComponent tooltipOf(Text mutableText) {
