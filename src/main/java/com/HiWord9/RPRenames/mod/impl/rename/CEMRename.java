@@ -87,7 +87,6 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
         if (spawnEggItem == null) {
             NbtCompound nbtName = new NbtCompound();
             nbtName.putString("id", Registries.ENTITY_TYPE.getId(this.getEntity()).toString());
-            
             try {
                 @SuppressWarnings("unchecked")
                 ComponentType<Object> entityDataType = (ComponentType<Object>) (Object) DataComponentTypes.ENTITY_DATA;
@@ -103,7 +102,6 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
         if (stack.getItem() instanceof SpawnEggItem spawnEggItem && client().world != null) {
             
             var entityType = spawnEggItem.getEntityType(stack);
-            
             var name = stack.getName();
 
             @SuppressWarnings("unchecked")
@@ -113,24 +111,18 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
             if (entityData != null) {
                 NbtCompound nbt = entityData.copyNbt();
                 
-                if (nbt.contains("CustomName")) {
-                    NbtElement element = nbt.get("CustomName");
-                    if (element != null && element.getType() == NbtElement.STRING_TYPE) {
-                        try {
-                            String jsonName = element.asString();
-                            
-                            Text parsedName = null;
-                            try {
-                                parsedName = Text.Serializer.fromJson(jsonName, client().world.getRegistryManager());
-                            } catch (Throwable t) {
-                                parsedName = Text.literal(jsonName);
-                            }
-
-                            if (parsedName != null) {
-                                name = parsedName;
-                            }
-                        } catch (Exception ignored) {}
-                    }
+                if (nbt.contains("CustomName") && nbt.get("CustomName").getType() == NbtElement.STRING_TYPE) { 
+                   try {
+                       String jsonName = nbt.getString("CustomName");
+                       Text parsedName = Text.Serialization.fromJson(jsonName, client().world.getRegistryManager());
+                       if (parsedName != null) {
+                           name = parsedName;
+                       }
+                   } catch (Throwable t) {
+                       try {
+                           name = Text.literal(nbt.getString("CustomName"));
+                       } catch (Exception ignored) {}
+                   }
                 }
             }
 
