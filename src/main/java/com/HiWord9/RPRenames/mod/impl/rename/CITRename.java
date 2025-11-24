@@ -1,14 +1,13 @@
 package com.HiWord9.RPRenames.mod.impl.rename;
 
 import com.HiWord9.RPRenames.api.rename.Rename;
+import com.HiWord9.RPRenames.api.rename.renderer.builder.RenameRendererBuilder;
+import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.CITRenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.util.PropertiesHelper;
 import com.HiWord9.RPRenames.mod.util.RenamesHelper;
-import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.CITRenameRendererBuilder;
-import com.HiWord9.RPRenames.api.rename.renderer.builder.RenameRendererBuilder;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
-// import net.minecraft.enchantment.EnchantmentHelper; // Больше не нужен здесь
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
@@ -158,15 +157,14 @@ public class CITRename extends ResourcePackRename implements HasProperties, HasN
     public boolean matchesStack(ItemStack stack) {
         boolean bl = false;
         var namePattern = getNamePattern();
+        
         if (namePattern == null) {
             bl = super.matchesStack(stack);
         } else {
             if (getItems().contains(stack.getItem())) {
-                // ИСПРАВЛЕНО: В 1.21.2+ Custom Name возвращает Text компонент.
-                // getString() работает корректно.
-                var customName = stack.get(DataComponentTypes.CUSTOM_NAME);
-                if (customName != null) {
-                    bl = namePattern.matcher(customName.getString()).matches();
+                Text customNameText = stack.get(DataComponentTypes.CUSTOM_NAME);
+                if (customNameText != null) {
+                    bl = namePattern.matcher(customNameText.getString()).matches();
                 }
             }
         }
@@ -197,19 +195,20 @@ public class CITRename extends ResourcePackRename implements HasProperties, HasN
                 hasEnchant = true;
                 hasEnoughLevels = true;
             } else {
-                // ИСПРАВЛЕНО для 1.21.10+:
-                // Вместо EnchantmentHelper.getEnchantments(stack) используем прямой геттер компонента
-                ItemEnchantmentsComponent enchantments = stack.getEnchantments(); 
-                // Или stack.get(DataComponentTypes.ENCHANTMENTS) если геттера нет в твоих маппингах
-
+                ItemEnchantmentsComponent enchantments = stack.getEnchantments();
+                
                 for (RegistryEntry<Enchantment> entry : enchantments.getEnchantments()) {
                     Optional<RegistryKey<Enchantment>> key = entry.getKey();
                     if (key.isEmpty()) continue;
+                    
                     Identifier id = key.get().getValue();
                     if (id == null) continue;
+
                     if (id.equals(rename.getEnchantment())) {
                         hasEnchant = true;
-                        if (PropertiesHelper.matchesRange(enchantments.getLevel(entry), rename.getOriginalEnchantmentLevel())) {
+                        // Проверяем уровень зачарования
+                        int level = enchantments.getLevel(entry);
+                        if (PropertiesHelper.matchesRange(level, rename.getOriginalEnchantmentLevel())) {
                             hasEnoughLevels = true;
                             break;
                         }
