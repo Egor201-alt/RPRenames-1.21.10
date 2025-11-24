@@ -41,7 +41,6 @@ public class GhostCraft implements Drawable, Element, Offsetable {
         for (GhostSlot slot : slots) slot.render(context, mouseX, mouseY, delta);
     }
 
-    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!doRender) return false;
 
