@@ -8,6 +8,7 @@ import com.HiWord9.RPRenames.mod.gui.tooltip_component.preview.ItemPreviewToolti
 import com.HiWord9.RPRenames.mod.gui.tooltip_component.preview.PlayerPreviewTooltipComponent;
 import com.HiWord9.RPRenames.mod.gui.widget.RPRWidget;
 import com.HiWord9.RPRenames.mod.impl.rename.ItemModelRename;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -25,7 +26,6 @@ import java.util.function.Supplier;
 import static com.HiWord9.RPRenames.mod.gui.Graphics.tooltipOf;
 import static com.HiWord9.RPRenames.mod.util.RenameRendererHelper.*;
 import static com.HiWord9.RPRenames.mod.util.Util.*;
-import static net.minecraft.client.gui.screen.Screen.hasShiftDown;
 
 public class ItemModelRenameRenderer extends SimpleRenameRenderer<ItemModelRename> implements RenameRenderer.Preview {
     private static final MutableText playerPreviewHintShift = Text.translatable(
@@ -110,9 +110,10 @@ public class ItemModelRenameRenderer extends SimpleRenameRenderer<ItemModelRenam
     public void onRenderTooltip(DrawContext context, int mouseX, int mouseY, int buttonX, int buttonY, int buttonWidth, int buttonHeight) {
         ArrayList<TooltipComponent> tooltipAddition = new ArrayList<>();
 
-        if (config().enablePreview) {
-            boolean shiftDown = hasShiftDown();
+        long handle = MinecraftClient.getInstance().getWindow().getHandle();
+        boolean shiftDown = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
 
+        if (config().enablePreview) {
             if (!shiftDown && !config().playerPreviewByDefault) {
                 if (!config().disableTooltipHints) tooltipAddition.add(tooltipOf(playerPreviewHintShift));
             } else if (shiftDown != config().playerPreviewByDefault) {
@@ -135,7 +136,7 @@ public class ItemModelRenameRenderer extends SimpleRenameRenderer<ItemModelRenam
         List<TooltipComponent> snapshot = new ArrayList<>(tooltipComponents);
         Graphics.drawTooltip(
                 context,
-                textRenderer(),
+                MinecraftClient.getInstance().textRenderer,
                 snapshot,
                 mouseX, mouseY,
                 HoveredTooltipPositioner.INSTANCE
@@ -149,7 +150,10 @@ public class ItemModelRenameRenderer extends SimpleRenameRenderer<ItemModelRenam
 
     @Override
     public void drawPreview(DrawContext context, int mouseX, int mouseY, List<TooltipComponent> mainTooltip) {
-        boolean shouldPreviewPlayer = hasShiftDown() != config().playerPreviewByDefault;
+        long handle = MinecraftClient.getInstance().getWindow().getHandle();
+        boolean shiftDown = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
+        
+        boolean shouldPreviewPlayer = shiftDown != config().playerPreviewByDefault;
         TooltipPositioner positioner = new PreviewTooltipPositioner(mainTooltip);
 
         if (shouldPreviewPlayer) {
@@ -166,7 +170,7 @@ public class ItemModelRenameRenderer extends SimpleRenameRenderer<ItemModelRenam
 
         Graphics.drawTooltipWithFixedBorders(
                 context,
-                textRenderer(),
+                MinecraftClient.getInstance().textRenderer,
                 playerPreviewTooltipComponent,
                 mouseX, mouseY,
                 positioner,
@@ -177,7 +181,7 @@ public class ItemModelRenameRenderer extends SimpleRenameRenderer<ItemModelRenam
     private void itemPreview(DrawContext context, int mouseX, int mouseY, TooltipPositioner positioner) {
         Graphics.drawTooltipWithFixedBorders(
                 context,
-                textRenderer(),
+                MinecraftClient.getInstance().textRenderer,
                 itemPreviewTooltipComponent,
                 mouseX, mouseY,
                 positioner,
@@ -188,7 +192,8 @@ public class ItemModelRenameRenderer extends SimpleRenameRenderer<ItemModelRenam
     private boolean fPressFuse = false;
 
     private boolean isFKeyJustPressed() {
-        if (InputUtil.isKeyPressed(client().getWindow().getHandle(), GLFW.GLFW_KEY_F)) {
+        long handle = MinecraftClient.getInstance().getWindow().getHandle();
+        if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_F)) {
             if (!fPressFuse) {
                 fPressFuse = true;
                 return true;
