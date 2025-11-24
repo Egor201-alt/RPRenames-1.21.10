@@ -4,6 +4,7 @@ import com.HiWord9.RPRenames.api.rename.Rename;
 import com.HiWord9.RPRenames.api.rename.renderer.builder.RenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.CEMRenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.util.PropertiesHelper;
+import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.EntityType;
@@ -88,10 +89,10 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
             nbtName.putString("id", Registries.ENTITY_TYPE.getId(this.getEntity()).toString());
             
             try {
-                stack.set(DataComponentTypes.ENTITY_DATA, NbtComponent.of(nbtName));
-            } catch (Exception e) {
-                
-            }
+                @SuppressWarnings("unchecked")
+                ComponentType<Object> entityDataType = (ComponentType<Object>) (Object) DataComponentTypes.ENTITY_DATA;
+                stack.set(entityDataType, NbtComponent.of(nbtName));
+            } catch (Exception ignored) {}
         }
         return stack;
     }
@@ -105,28 +106,33 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
             
             var name = stack.getName();
 
-            var entityData = stack.get(DataComponentTypes.ENTITY_DATA);
+            @SuppressWarnings("unchecked")
+            ComponentType<NbtComponent> type = (ComponentType<NbtComponent>) (Object) DataComponentTypes.ENTITY_DATA;
+            
+            var entityData = stack.get(type);
+            
             if (entityData != null) {
-                NbtCompound nbt = entityData.copyNbt();
 
+                NbtCompound nbt = entityData.copyNbt();
+                
                 if (nbt.contains("CustomName") && nbt.getType("CustomName") == NbtElement.STRING_TYPE) { 
                    try {
                        String jsonName = nbt.getString("CustomName");
                        
-                       Text parsedName = Text.TextCodecs.CODEC.parse(net.minecraft.registry.DynamicOps.of(net.minecraft.nbt.NbtOps.INSTANCE, nbt.get("CustomName"))).result().orElse(null);
+                       Text parsedName = Text.TextCodecs.CODEC.parse(net.minecraft.registry.DynamicOps.of(net.minecraft.nbt.NbtOps.INSTANCE, net.minecraft.nbt.NbtString.of(jsonName))).result().orElse(null);
                        
                        if (parsedName == null) {
-                            try {
-                                parsedName = Text.Serializer.fromJson(jsonName, client().world.getRegistryManager());
-                            } catch (Throwable t) {
-                                parsedName = Text.of(jsonName);
-                            }
+                           parsedName = Text.Serialization.fromJson(jsonName, client().world.getRegistryManager());
                        }
                        
                        if (parsedName != null) {
                            name = parsedName;
                        }
-                   } catch (Exception ignored) {}
+                   } catch (Throwable t) {
+                       try {
+                           name = Text.of(nbt.getString("CustomName"));
+                       } catch (Exception ignored) {}
+                   }
                 }
             }
 
