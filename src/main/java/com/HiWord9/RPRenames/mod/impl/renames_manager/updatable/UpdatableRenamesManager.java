@@ -7,6 +7,7 @@ import com.HiWord9.RPRenames.api.rename.Rename;
 import com.HiWord9.RPRenames.mod.impl.renames_manager.updatable.parser.Parser;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceReloader;
+import net.minecraft.util.profiler.DummyProfiler;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.profiler.Profilers;
 
@@ -52,15 +53,15 @@ public class UpdatableRenamesManager extends RenamesManagerImpl<Rename> implemen
 
     @Override
     public CompletableFuture<Void> reload(
-            Synchronizer synchronizer, 
+            ResourceReloader.Synchronizer synchronizer, 
             ResourceManager manager, 
-            Profiler prepareProfiler, 
-            Profiler applyProfiler, 
             Executor prepareExecutor, 
             Executor applyExecutor
     ) {
         return CompletableFuture.supplyAsync(() -> {
-            if (config().updateConfig) updateRenames(manager, prepareProfiler);
+            if (config().updateConfig) {
+                updateRenames(manager, DummyProfiler.INSTANCE);
+            }
             return null;
         }, prepareExecutor).thenCompose(synchronizer::whenPrepared).thenAcceptAsync(o -> {}, applyExecutor);
     }
