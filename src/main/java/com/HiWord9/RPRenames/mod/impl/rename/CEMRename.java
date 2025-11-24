@@ -1,17 +1,18 @@
 package com.HiWord9.RPRenames.mod.impl.rename;
 
 import com.HiWord9.RPRenames.api.rename.Rename;
-import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.CEMRenameRendererBuilder;
 import com.HiWord9.RPRenames.api.rename.renderer.builder.RenameRendererBuilder;
+import com.HiWord9.RPRenames.mod.impl.rename.renderer.builder.CEMRenameRendererBuilder;
 import com.HiWord9.RPRenames.mod.util.PropertiesHelper;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
+import net.minecraft.component.type.CustomData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 
@@ -85,7 +86,7 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
         if (spawnEggItem == null) {
             NbtCompound nbtName = new NbtCompound();
             nbtName.putString("id", Registries.ENTITY_TYPE.getId(this.getEntity()).toString());
-            stack.set(DataComponentTypes.ENTITY_DATA, NbtComponent.of(nbtName));
+            stack.set(DataComponentTypes.ENTITY_DATA, CustomData.of(nbtName));
         }
         return stack;
     }
@@ -103,9 +104,13 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
             if (entityData != null) {
                 NbtCompound nbt = entityData.copyNbt();
                 
-                if (nbt.contains("CustomName", 8)) { // 8 = String
+                if (nbt.contains("CustomName", NbtElement.STRING_TYPE)) { 
                    try {
-                       name = Text.of(nbt.getString("CustomName")); 
+                       String jsonName = nbt.getString("CustomName");
+                       Text parsedName = Text.Serialization.fromJson(jsonName, client().world.getRegistryManager());
+                       if (parsedName != null) {
+                           name = parsedName;
+                       }
                    } catch (Exception ignored) {}
                 }
             }
