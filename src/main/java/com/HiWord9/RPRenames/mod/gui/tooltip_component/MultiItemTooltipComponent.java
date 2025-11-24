@@ -25,12 +25,10 @@ public class MultiItemTooltipComponent implements TooltipComponent {
         this.items.addAll(items);
     }
 
-    @Override
     public int getHeight() {
         return SLOT_SIZE * Math.min(2, 1 + (items.size() - 1) / 4) + 3;
     }
 
-    @Override
     public int getWidth(TextRenderer textRenderer) {
         int size = items.size();
         if (size <= 4) {
@@ -39,7 +37,6 @@ public class MultiItemTooltipComponent implements TooltipComponent {
         return SLOT_SIZE * Math.min(4, 3 + (size - 4) / 3);
     }
 
-    @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
         int i = 0;
         int size = items.size();
