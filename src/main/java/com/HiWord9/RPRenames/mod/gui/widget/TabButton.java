@@ -14,8 +14,6 @@ import net.minecraft.util.Identifier;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.HiWord9.RPRenames.mod.util.Util.*;
-
 public class TabButton extends ClickableWidget implements OffsetableWidget {
     private static final Identifier TEXTURE = Identifier.of(RPRenames.MOD_ID, "textures/gui/tabs.png");
     private static final String TRANSLATION_PREFIX = "rprenames.gui.tabs.tooltip.";
@@ -64,7 +62,6 @@ public class TabButton extends ClickableWidget implements OffsetableWidget {
         }
     }
 
-    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.active || !this.visible) {
             return false;
