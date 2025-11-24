@@ -2,12 +2,12 @@ package com.HiWord9.RPRenames.mod.gui.widget;
 
 import com.HiWord9.RPRenames.mod.RPRenames;
 import com.HiWord9.RPRenames.mod.gui.Graphics;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.input.Click;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -33,7 +33,7 @@ public class TabButton extends ClickableWidget implements OffsetableWidget {
     private final int index;
 
     public TabButton(RPRWidget instance, int x, int y, RPRWidget.Tab tab) {
-        super(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, null);
+        super(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, Text.empty());
         rprWidget = instance;
 
         this.tab = tab;
@@ -46,7 +46,7 @@ public class TabButton extends ClickableWidget implements OffsetableWidget {
         int v = index * TYPE_OFFSET_V;
         
         context.drawTexture(
-            RenderPipelines.GUI_TEXTURED, 
+            RenderLayer::getGuiTextured, 
             TEXTURE, 
             getX(), getY(), 
             u, v, 
@@ -66,17 +66,28 @@ public class TabButton extends ClickableWidget implements OffsetableWidget {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean released) {
-        double mouseX = click.x();
-        double mouseY = click.y();
-        
-        if (this.isMouseOver(mouseX, mouseY)) {
-            if (rprWidget.getCurrentTab() != tab) rprWidget.openTab(tab);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (!this.active || !this.visible) {
+            return false;
+        }
+
+        if (this.isValidClickButton(button) && this.clicked(mouseX, mouseY)) {
+            this.playDownSound(MinecraftClient.getInstance().getSoundManager());
+            
+            if (rprWidget.getCurrentTab() != tab) {
+                rprWidget.openTab(tab);
+            }
             return true;
         }
-        return super.mouseClicked(click, released);
+        return false;
     }
 
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
+
+    @Override
+    public void offset(int x, int y) {
+        setX(getX() + x);
+        setY(getY() + y);
+    }
 }
