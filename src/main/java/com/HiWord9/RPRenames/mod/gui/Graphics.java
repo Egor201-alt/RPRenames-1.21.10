@@ -64,14 +64,7 @@ public class Graphics {
     }
 
     public static void renderStack(DrawContext context, ItemStack itemStack, int x, int y, int z, int size) {
-        float scale = size != STACK_IN_SLOT_SIZE ? ((float) size / STACK_IN_SLOT_SIZE) : 1f;
-        
-        MatrixStack matrices = context.getMatrices();
-        matrices.push();
-        matrices.translate(x, y, z);
-        matrices.scale(scale, scale, 1.0f);
-        context.drawItem(itemStack, 0, 0);
-        matrices.pop();
+        context.drawItem(itemStack, x, y);
     }
 
     public static void renderEntityInBox(DrawContext context, ScreenRect rect, int size, Entity entity, boolean spin) {
@@ -92,41 +85,20 @@ public class Graphics {
     public static void renderEntity(DrawContext context, int x1, int y1, int x2, int y2, double size, Entity entity, boolean spin) {
         if (entity instanceof SquidEntity) size /= 1.5;
         else if (entity instanceof ItemEntity) size *= 2;
-
         if (entity instanceof LivingEntity l && l.isBaby()) size /= 1.7;
-
         var camera = client().getCameraEntity();
-        if (camera != null) {
-            entity.setPos(camera.getX(), camera.getY(), camera.getZ());
-        }
-
-        if (!(entity instanceof PlayerEntity)) {
-            if (player() != null) entity.age = player().age;
-        }
-
+        if (camera != null) { entity.setPos(camera.getX(), camera.getY(), camera.getZ()); }
+        if (!(entity instanceof PlayerEntity)) { if (player() != null) entity.age = player().age; }
         int centerX = (x1 + x2) / 2;
         int centerY = (y1 + y2) / 2;
         int entityY = centerY + (int)(size * 0.4);
 
         if (entity instanceof LivingEntity living) {
+            Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
+            Quaternionf q2 = new Quaternionf().rotateX((float) (-Math.PI / 6));
+            rotation.mul(q2);
             
-            float originalBodyYaw = living.bodyYaw;
-            float originalYaw = living.getYaw();
-            float originalPitch = living.getPitch();
-            float originalHeadYaw = living.getHeadYaw();
-
-            living.bodyYaw = 180.0F;
-            living.setYaw(180.0F);
-            living.setPitch(0.0F);
-            living.setHeadYaw(living.getYaw());
-            
-            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, 0f, 0f, living);
-
-            living.bodyYaw = originalBodyYaw;
-            living.setYaw(originalYaw);
-            living.setPitch(originalPitch);
-            living.setHeadYaw(originalHeadYaw);
-            
+            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, new Vector3f(), rotation, q2, living);
         } else if (entity instanceof ItemEntity itemEntity) {
             renderStack(context, itemEntity.getStack(), centerX - 8, centerY - 8, 0, (int)size);
         }
@@ -151,37 +123,18 @@ public class Graphics {
         drawTooltip(context, textRenderer, List.of(component), x, y, positioner, favorite);
     }
 
-    public static void drawTooltipWithFixedBorders(
-            DrawContext context, TextRenderer textRenderer,
-            TooltipComponent component,
-            int x, int y,
-            TooltipPositioner positioner,
-            boolean favorite
-    ) {
-        drawTooltip(
-                context, textRenderer,
-                List.of(component,
-                        new TooltipComponent() {
-                            public int getHeight() {return 0;}
-                            public int getWidth(TextRenderer textRenderer) {return 0;}
-                        }
-                ),
-                x, y, positioner, favorite
-        );
+    public static void drawTooltipWithFixedBorders(DrawContext context, TextRenderer textRenderer, TooltipComponent component, int x, int y, TooltipPositioner positioner, boolean favorite) { 
+        TooltipComponent empty = new TooltipComponent() {
+        };
+        drawTooltip(context, textRenderer, List.of(component), x, y, positioner, favorite); 
     }
 
-    public static void drawTooltip(
-            DrawContext context, TextRenderer textRenderer,
-            List<TooltipComponent> components,
-            int x, int y,
-            TooltipPositioner positioner,
-            boolean favorite
-    ) {
+    public static void drawTooltip(DrawContext context, TextRenderer textRenderer, List<TooltipComponent> components, int x, int y, TooltipPositioner positioner, boolean favorite) {
         renderTooltipAsFavorite = favorite;
         try {
             context.drawTooltip(textRenderer, components, x, y, positioner);
         } catch (Exception e) {
-            //
+            // Ignored
         }
         renderTooltipAsFavorite = false;
     }
