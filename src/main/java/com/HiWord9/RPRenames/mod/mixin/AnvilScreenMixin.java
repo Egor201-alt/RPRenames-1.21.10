@@ -216,7 +216,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         
         var matrices = context.getMatrices(); // Safe inference
         matrices.pushMatrix();
-        matrices.translate(-xScreenOffset, -yScreenOffset, 0);
+        matrices.translate(-xScreenOffset, -yScreenOffset);
 
         opener.render(context, mouseX, mouseY, 0);
         favoriteButton.render(context, mouseX, mouseY, 0);
