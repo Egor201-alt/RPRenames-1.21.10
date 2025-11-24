@@ -20,7 +20,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.List;
 
-import static com.HiWord9.RPRenames.mod.util.Util.*;
+import static com.HiWord9.RPRenames.mod.util.Util.config;
 
 public class RenameButton extends ClickableWidget implements OffsetableWidget {
     final int highlightColor = config().getSlotHighlightRGBA();
@@ -100,7 +100,6 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
         );
     }
 
-    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.active || !this.visible) return false;
 
@@ -116,7 +115,7 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
             rprWidget.addOrRemoveFavorite(!favorite, items, rename.getName().getString());
             return true;
         } 
-        else if (button == 0) { // Левый клик
+        else if (button == 0) {
             this.playDownSound(MinecraftClient.getInstance().getSoundManager());
             rprWidget.doRename(rename);
             return true;
