@@ -96,7 +96,7 @@ public class Graphics {
 
         if (entity instanceof LivingEntity living) {
             
-            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, 0f, 0f, living);
+            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, mouseX, mouseY, 0f, 0f, living);
             
         } else if (entity instanceof ItemEntity itemEntity) {
             renderStack(context, itemEntity.getStack(), centerX - 8, centerY - 8, 0, (int)size);
@@ -124,6 +124,10 @@ public class Graphics {
 
     public static void drawTooltipWithFixedBorders(DrawContext context, TextRenderer textRenderer, TooltipComponent component, int x, int y, TooltipPositioner positioner, boolean favorite) { 
         TooltipComponent empty = new TooltipComponent() {
+            @Override
+            public int getHeight(@Nonnull TextRenderer textRenderer) { return 0; }
+            @Override
+            public int getWidth(@Nonnull TextRenderer textRenderer) { return 0; }
         };
         TooltipComponent emptyReal = new TooltipComponent() {
         };
