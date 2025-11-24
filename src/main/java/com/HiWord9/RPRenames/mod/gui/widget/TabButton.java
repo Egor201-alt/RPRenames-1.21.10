@@ -34,10 +34,9 @@ public class TabButton extends ClickableWidget implements OffsetableWidget {
 
     public TabButton(RPRWidget instance, int x, int y, RPRWidget.Tab tab) {
         super(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, Text.empty());
-        rprWidget = instance;
-
+        this.rprWidget = instance;
         this.tab = tab;
-        index = Arrays.stream(RPRWidget.Tab.values()).toList().indexOf(tab);
+        this.index = Arrays.stream(RPRWidget.Tab.values()).toList().indexOf(tab);
     }
 
     @Override
@@ -57,7 +56,7 @@ public class TabButton extends ClickableWidget implements OffsetableWidget {
         if (isMouseOver(mouseX, mouseY)) {
             Graphics.drawTooltip(
                     context,
-                    textRenderer(),
+                    MinecraftClient.getInstance().textRenderer,
                     List.of(Graphics.tooltipOf(Text.translatable(TRANSLATION_PREFIX + tab.toString()))),
                     mouseX, mouseY,
                     HoveredTooltipPositioner.INSTANCE
