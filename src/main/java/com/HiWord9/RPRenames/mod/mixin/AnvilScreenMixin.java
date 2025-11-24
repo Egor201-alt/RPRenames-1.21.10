@@ -178,7 +178,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     @Override
     public void updateMenuShift() {
         if (!config().offsetMenu) return;
-        offsetX(MENU_SHIFT * (rprWidget.isOpen() ? 1 : -1));
+        offset(MENU_SHIFT * (rprWidget.isOpen() ? 1 : -1), 0);
     }
 
     @Override
