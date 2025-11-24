@@ -51,7 +51,7 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
             boolean favorite
     ) {
         super(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, Text.empty());
-        rprWidget = instance;
+        this.rprWidget = instance;
         this.favorite = favorite;
         this.rename = rename;
 
@@ -64,7 +64,7 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         int u = favorite ? FAVORITE_OFFSET_U : 0;
-        int v = hovered || (selected && config().highlightSelected) ? FOCUSED_OFFSET_V : 0;
+        int v = isHovered() || (selected && config().highlightSelected) ? FOCUSED_OFFSET_V : 0;
         
         context.drawTexture(
                 RenderPipelines.GUI_TEXTURED,
@@ -116,7 +116,7 @@ public class RenameButton extends ClickableWidget implements OffsetableWidget {
             rprWidget.addOrRemoveFavorite(!favorite, items, rename.getName().getString());
             return true;
         } 
-        else if (button == 0) {
+        else if (button == 0) { // Левый клик
             this.playDownSound(MinecraftClient.getInstance().getSoundManager());
             rprWidget.doRename(rename);
             return true;
