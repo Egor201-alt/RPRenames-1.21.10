@@ -24,6 +24,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.client.render.VertexConsumerProvider;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector2ic;
@@ -162,29 +163,25 @@ public class Graphics {
             int tooltipY = position.y();
             int zLevel = 400;
 
-            context.getMatrices().pushMatrix(); 
-            
-            context.getMatrices().translate((float)tooltipX, (float)tooltipY);
-
             TooltipBackgroundRenderer.render(context, tooltipX, tooltipY, width, height, null);
 
             int currentY = tooltipY;
             
             Matrix4f textMatrix = new Matrix4f().translate(0, 0, zLevel);
+            
+            VertexConsumerProvider consumers = client().getBufferBuilders().getEntityVertexConsumers();
 
             for (int i = 0; i < components.size(); i++) {
                 TooltipComponent component = components.get(i);
                 int compWidth = component.getWidth(textRenderer);
                 int compHeight = component.getHeight(textRenderer);
                 
-                component.drawText(textRenderer, tooltipX, currentY, textMatrix, context.getVertexConsumers());
+                component.drawText(textRenderer, tooltipX, currentY, textMatrix, consumers);
                 
                 component.drawItems(textRenderer, tooltipX, currentY, compWidth, compHeight, context);
                 
                 currentY += compHeight + (i == 0 ? 2 : 0);
             }
-
-            context.getMatrices().popMatrix();
 
         } catch (Exception e) {
             e.printStackTrace();
