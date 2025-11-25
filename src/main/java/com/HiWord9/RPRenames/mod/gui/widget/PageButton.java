@@ -11,6 +11,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.client.util.Window;
 import org.lwjgl.glfw.GLFW;
 
 import static com.HiWord9.RPRenames.mod.util.Util.*;
@@ -51,14 +52,17 @@ public class PageButton extends ClickableWidget implements OffsetableWidget {
             TEXTURE_WIDTH, TEXTURE_HEIGHT
         );
 
-        boolean shift = Screen.hasShiftDown();
+        Window window = MinecraftClient.getInstance().getWindow();
+        
+        boolean shift = InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) 
+                     || InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
 
         if (!config().disablePageArrowsHints && shift && active && isHovered()) {
             String key = "rprenames.gui.page" + (type == Type.DOWN ? "Down.toFirst" : "Up.toLast") + ".tooltip";
             context.drawTooltip(textRenderer(), Text.translatable(key).formatted(Formatting.GRAY), mouseX, mouseY);
         }
     }
-
+    
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.active || !this.visible) return false;
         
