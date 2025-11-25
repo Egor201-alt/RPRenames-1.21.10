@@ -52,14 +52,13 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
 
     boolean init = false;
 
-    @Inject(at = @At("TAIL"), method = "init")
-    private void init(CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "init(Lnet/minecraft/client/MinecraftClient;II)V")
+    private void init(MinecraftClient client, int width, int height, CallbackInfo ci) {
         if (shouldNotModify() || init) return;
         init = true;
 
         AnvilScreen screen = (AnvilScreen) (Object) this;
-        
-        int x = screen.x; 
+        int x = screen.x;
         int y = screen.y;
 
         opener = new OpenerButton(rprWidget, x + 3, y + 44);
