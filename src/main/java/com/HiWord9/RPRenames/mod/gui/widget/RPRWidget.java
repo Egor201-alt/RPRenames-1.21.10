@@ -433,7 +433,7 @@ public class RPRWidget implements Drawable, OffsetableWidget {
 
         double mouseX = click.x(); 
         double mouseY = click.y();
-        int button = click.id();
+        int button = click.button();
 
         for (ClickableWidget widget : widgets) {
             if (widget.mouseClicked(click, isReleased)) {
