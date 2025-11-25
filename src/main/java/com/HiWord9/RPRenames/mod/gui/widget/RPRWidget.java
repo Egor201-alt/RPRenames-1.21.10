@@ -17,6 +17,8 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.input.Click;
+import net.minecraft.client.gui.input.KeyInput;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
@@ -431,7 +433,7 @@ public class RPRWidget implements Drawable, OffsetableWidget {
 
         double mouseX = click.x(); 
         double mouseY = click.y();
-        int button = click.button();
+        int button = click.id();
 
         for (ClickableWidget widget : widgets) {
             if (widget.mouseClicked(click, isReleased)) {
