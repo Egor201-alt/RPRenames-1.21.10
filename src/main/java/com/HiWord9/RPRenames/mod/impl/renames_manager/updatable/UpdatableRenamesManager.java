@@ -51,21 +51,23 @@ public class UpdatableRenamesManager extends RenamesManagerImpl<Rename> implemen
         profiler.pop();
     }
 
-    @Override
     public CompletableFuture<Void> reload(
-            ResourceReloader.Synchronizer synchronizer, 
-            ResourceManager manager, 
-            Executor prepareExecutor, 
+            ResourceReloader.Store store,
+            Executor prepareExecutor,
+            ResourceReloader.Synchronizer synchronizer,
             Executor applyExecutor
     ) {
-        return CompletableFuture.supplyAsync(() -> null, prepareExecutor)
-                
-                .thenCompose(synchronizer::whenPrepared)
-                
-                .thenAcceptAsync((voidObj) -> {
-                    if (config().updateConfig) {
-                        updateRenames(manager, DummyProfiler.INSTANCE);
-                    }
-                }, applyExecutor);
+        return CompletableFuture.supplyAsync(() -> {
+
+            return null;
+        }, prepareExecutor)
+        
+        .thenCompose(synchronizer::whenPrepared)
+        
+        .thenAcceptAsync((voidObj) -> {
+            if (config().updateConfig) {
+                updateRenames(client().getResourceManager(), DummyProfiler.INSTANCE);
+            }
+        }, applyExecutor);
     }
 }
