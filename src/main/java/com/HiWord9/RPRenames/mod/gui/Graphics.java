@@ -27,6 +27,7 @@ import net.minecraft.util.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector2ic;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -159,27 +160,33 @@ public class Graphics {
             Vector2ic position = positioner.getPosition(context.getScaledWindowWidth(), context.getScaledWindowHeight(), x, y, width, height);
             int tooltipX = position.x();
             int tooltipY = position.y();
+            int zLevel = 400;
 
-            context.getMatrices().push();
-            context.getMatrices().translate(0.0f, 0.0f, 400.0f);
+            context.getMatrices().pushMatrix(); 
+            
+            context.getMatrices().translate((float)tooltipX, (float)tooltipY);
 
-            TooltipBackgroundRenderer.render(context, tooltipX, tooltipY, width, height, 400);
+            TooltipBackgroundRenderer.render(context, tooltipX, tooltipY, width, height, zLevel, null);
 
             int currentY = tooltipY;
+            
+            Matrix4f textMatrix = new Matrix4f().translate(0, 0, zLevel);
+
             for (int i = 0; i < components.size(); i++) {
                 TooltipComponent component = components.get(i);
+                int compWidth = component.getWidth(textRenderer);
+                int compHeight = component.getHeight(textRenderer);
                 
-                component.drawText(textRenderer, tooltipX, currentY, context.getMatrices().peek().getPositionMatrix(), context.getVertexConsumers());
+                component.drawText(textRenderer, tooltipX, currentY, textMatrix, context.vertexConsumers());
                 
-                component.drawItems(textRenderer, tooltipX, currentY, context);
+                component.drawItems(textRenderer, tooltipX, currentY, compWidth, compHeight, context);
                 
-                currentY += component.getHeight(textRenderer) + (i == 0 ? 2 : 0);
+                currentY += compHeight + (i == 0 ? 2 : 0);
             }
 
-            context.getMatrices().pop();
+            context.getMatrices().popMatrix();
 
         } catch (Exception e) {
-            // Ignored
             e.printStackTrace();
         }
         renderTooltipAsFavorite = false;
