@@ -442,6 +442,7 @@ public class RPRWidget implements Drawable, OffsetableWidget {
                 currentScreen().setFocused(null);
             }
         }
+        
         for (RenameButton renameButton : buttons) { 
             if (renameButton.mouseClicked(click, isReleased)) return true; 
         }
@@ -450,6 +451,7 @@ public class RPRWidget implements Drawable, OffsetableWidget {
 
     public boolean keyPressed(KeyInput input) {
         if (!open) return false;
+
         for (ClickableWidget widget : widgets) {
             if (widget.keyPressed(input)) return true; 
         }
