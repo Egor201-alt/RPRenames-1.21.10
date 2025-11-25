@@ -144,7 +144,7 @@ public class Graphics {
     public static void drawTooltip(DrawContext context, TextRenderer textRenderer, List<TooltipComponent> components, int x, int y, TooltipPositioner positioner, boolean favorite) {
         renderTooltipAsFavorite = favorite;
         try {
-            context.drawTooltip(textRenderer, x, y, components);
+            context.drawTooltip(textRenderer, components, x, y, positioner, null);
             
         } catch (Exception e) {
             // Ignored
