@@ -14,8 +14,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.MouseInput;
 import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.input.MouseInput;
 import net.minecraft.client.util.math.MatrixStack; 
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
@@ -52,13 +52,14 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
 
     boolean init = false;
 
-    @Inject(at = @At("TAIL"), method = "setup")
+    @Inject(at = @At("TAIL"), method = "init")
     private void init(CallbackInfo ci) {
         if (shouldNotModify() || init) return;
         init = true;
 
         AnvilScreen screen = (AnvilScreen) (Object) this;
-        int x = screen.x;
+        
+        int x = screen.x; 
         int y = screen.y;
 
         opener = new OpenerButton(rprWidget, x + 3, y + 44);
@@ -90,7 +91,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     }
 
     @Inject(at = @At("RETURN"), method = "onRenamed")
-    private void newNameEntered(CallbackInfo ci) {
+    private void newNameEntered(String name, CallbackInfo ci) {
         if (shouldNotModify() || !init) return;
         rprWidget.updatedName();
     }
@@ -113,17 +114,17 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     }
 
     @Inject(at = @At(value = "HEAD"), method = "keyPressed")
-    public void onKeyPressedHead(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+    public void onKeyPressedHead(KeyInput input, CallbackInfoReturnable<Boolean> cir) {
         if (shouldNotModify()) return;
         afterPutInAnvilFirst = false;
         afterPutInAnvilSecond = false;
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;isActive()Z"), method = "keyPressed")
-    private boolean onKeyPressedNameFieldIsActive(TextFieldWidget instance, int keyCode, int scanCode, int modifiers) {
+    private boolean onKeyPressedNameFieldIsActive(TextFieldWidget instance, KeyInput input) {
         if (shouldNotModify()) return instance.isActive();
         
-        return rprWidget.keyPressed(new KeyInput(keyCode, scanCode, modifiers))
+        return rprWidget.keyPressed(input)
                 || rprWidget.searchField.isActive()
                 || instance.isActive();
     }
@@ -144,7 +145,6 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         afterPutInAnvilSecond = false;
         
         if (opener.mouseClicked(mouseX, mouseY, button)) return true;
-        
         if (favoriteButton.mouseClicked(mouseX, mouseY, button)) return true;
         
         if (ghostCraft.mouseClicked(mouseX, mouseY, button)) {
@@ -221,16 +221,15 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         int xScreenOffset = screen.x;
         int yScreenOffset = screen.y;
         
-        var matrices = context.getMatrices(); // Safe inference
-        matrices.pushMatrix();
-        matrices.translate(-xScreenOffset, -yScreenOffset);
+        context.getMatrices().pushMatrix();
+        context.getMatrices().translate((float)-xScreenOffset, (float)-yScreenOffset, 0.0f);
 
         opener.render(context, mouseX, mouseY, 0);
         favoriteButton.render(context, mouseX, mouseY, 0);
         ghostCraft.render(context, mouseX, mouseY, 0);
         rprWidget.render(context, mouseX, mouseY, 0);
 
-        matrices.popMatrix();
+        context.getMatrices().popMatrix();
     }
 
     @Override
