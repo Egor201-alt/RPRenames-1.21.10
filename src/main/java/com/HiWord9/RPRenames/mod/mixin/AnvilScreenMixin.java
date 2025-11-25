@@ -222,7 +222,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         int yScreenOffset = screen.y;
         
         context.getMatrices().pushMatrix();
-        context.getMatrices().translate((float)-xScreenOffset, (float)-yScreenOffset, 0.0f);
+        context.getMatrices().translate((float)-xScreenOffset, (float)-yScreenOffset);
 
         opener.render(context, mouseX, mouseY, 0);
         favoriteButton.render(context, mouseX, mouseY, 0);
