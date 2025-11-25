@@ -45,8 +45,8 @@ public abstract class DrawContextMixin {
         }
     }
 
-    @Inject(method = "draw", at = @At("TAIL"))
-    private void afterDraw(CallbackInfo ci) {
+    @Inject(method = "draw(Z)V", at = @At("TAIL"))
+    private void afterDraw(boolean bl, CallbackInfo ci) {
         if (!extraTooltipDrawers.isEmpty()) {
             for (Runnable drawer : extraTooltipDrawers) {
                 drawer.run();
