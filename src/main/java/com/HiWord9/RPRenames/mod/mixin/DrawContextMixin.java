@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(DrawContext.class)
@@ -27,7 +26,7 @@ public abstract class DrawContextMixin {
     public abstract void drawTooltipImmediately(TextRenderer textRenderer, List<TooltipComponent> components, int x, int y, TooltipPositioner positioner, @Nullable Identifier texture);
 
     @Unique
-    private final List<Runnable> extraTooltipDrawers = new ArrayList<>();
+    private boolean isRenderingRenamesTooltip = false;
 
     @Inject(
             method = "drawTooltipImmediately(Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;IILnet/minecraft/client/gui/tooltip/TooltipPositioner;Lnet/minecraft/util/Identifier;)V",
@@ -35,23 +34,26 @@ public abstract class DrawContextMixin {
             cancellable = true
     )
     private void onDrawTooltip(TextRenderer textRenderer, List<TooltipComponent> components, int x, int y, TooltipPositioner positioner, @Nullable Identifier texture, CallbackInfo ci) {
-        if (!components.isEmpty()) {
-            if (tooltipDrawer == null) {
-                tooltipDrawer = () -> this.drawTooltipImmediately(textRenderer, components, x, y, positioner, texture);
-            } else {
-                extraTooltipDrawers.add(() -> this.drawTooltipImmediately(textRenderer, components, x, y, positioner, texture));
-            }
-            ci.cancel();
+        if (components.isEmpty() || this.isRenderingRenamesTooltip) {
+            return;
         }
-    }
 
-    @Inject(method = "draw(Z)V", at = @At("TAIL"))
-    private void afterDraw(boolean bl, CallbackInfo ci) {
-        if (!extraTooltipDrawers.isEmpty()) {
-            for (Runnable drawer : extraTooltipDrawers) {
-                drawer.run();
-            }
-            extraTooltipDrawers.clear();
+        ci.cancel();
+
+        Runnable currentTask = () -> {
+            this.isRenderingRenamesTooltip = true;
+            this.drawTooltipImmediately(textRenderer, components, x, y, positioner, texture);
+            this.isRenderingRenamesTooltip = false;
+        };
+
+        if (this.tooltipDrawer == null) {
+            this.tooltipDrawer = currentTask;
+        } else {
+            Runnable previousTask = this.tooltipDrawer;
+            this.tooltipDrawer = () -> {
+                previousTask.run();
+                currentTask.run();
+            };
         }
     }
 }
