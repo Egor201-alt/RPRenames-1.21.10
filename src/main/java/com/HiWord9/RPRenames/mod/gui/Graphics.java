@@ -166,7 +166,7 @@ public class Graphics {
             
             context.getMatrices().translate((float)tooltipX, (float)tooltipY);
 
-            TooltipBackgroundRenderer.render(context, tooltipX, tooltipY, width, height, zLevel, null);
+            TooltipBackgroundRenderer.render(context, tooltipX, tooltipY, width, height, null);
 
             int currentY = tooltipY;
             
@@ -177,7 +177,7 @@ public class Graphics {
                 int compWidth = component.getWidth(textRenderer);
                 int compHeight = component.getHeight(textRenderer);
                 
-                component.drawText(textRenderer, tooltipX, currentY, textMatrix, context.vertexConsumers());
+                component.drawText(textRenderer, tooltipX, currentY, textMatrix, context.getVertexConsumers());
                 
                 component.drawItems(textRenderer, tooltipX, currentY, compWidth, compHeight, context);
                 
