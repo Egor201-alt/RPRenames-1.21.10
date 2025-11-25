@@ -132,7 +132,10 @@ public class Graphics {
             public int getWidth(TextRenderer textRenderer) { return 0; }
         };
         TooltipComponent emptyReal = new TooltipComponent() {
-            // Coming...
+            @Override
+            public int getHeight(TextRenderer textRenderer) { return 0; }
+            @Override
+            public int getWidth(TextRenderer textRenderer) { return 0; }
         };
         
         drawTooltip(context, textRenderer, List.of(component), x, y, positioner, favorite); 
@@ -141,7 +144,7 @@ public class Graphics {
     public static void drawTooltip(DrawContext context, TextRenderer textRenderer, List<TooltipComponent> components, int x, int y, TooltipPositioner positioner, boolean favorite) {
         renderTooltipAsFavorite = favorite;
         try {
-            context.drawTooltip(textRenderer, components, x, y, positioner);
+            context.drawTooltip(textRenderer, x, y, components);
             
         } catch (Exception e) {
             // Ignored
