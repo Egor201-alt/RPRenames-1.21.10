@@ -17,7 +17,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.Click;
+import net.minecraft.client.gui.Click
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.util.InputUtil;
