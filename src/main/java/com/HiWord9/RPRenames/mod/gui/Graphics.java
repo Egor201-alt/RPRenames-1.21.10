@@ -161,22 +161,17 @@ public class Graphics {
             Vector2ic position = positioner.getPosition(context.getScaledWindowWidth(), context.getScaledWindowHeight(), x, y, width, height);
             int tooltipX = position.x();
             int tooltipY = position.y();
-            int zLevel = 400;
-
+            
             TooltipBackgroundRenderer.render(context, tooltipX, tooltipY, width, height, null);
 
             int currentY = tooltipY;
-            
-            Matrix4f textMatrix = new Matrix4f().translate(0, 0, zLevel);
-            
-            VertexConsumerProvider consumers = client().getBufferBuilders().getEntityVertexConsumers();
 
             for (int i = 0; i < components.size(); i++) {
                 TooltipComponent component = components.get(i);
                 int compWidth = component.getWidth(textRenderer);
                 int compHeight = component.getHeight(textRenderer);
                 
-                component.drawText(textRenderer, tooltipX, currentY, textMatrix, consumers);
+                component.drawText(context, textRenderer, tooltipX, currentY);
                 
                 component.drawItems(textRenderer, tooltipX, currentY, compWidth, compHeight, context);
                 
