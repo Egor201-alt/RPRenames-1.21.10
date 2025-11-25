@@ -444,12 +444,12 @@ public class RPRWidget implements Drawable, OffsetableWidget {
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!open) return false;
-        KeyInput input = new keyPressed(keyCode, scanCode, modifiers);
         for (ClickableWidget widget : widgets) {
-            if (widget.keyPressed(input)) return true;
+            if (widget.keyPressed(keyCode, scanCode, modifiers)) return true; 
         }
         return false;
     }
+
 
 
     public void setFocused(boolean focused) {}
