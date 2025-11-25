@@ -95,8 +95,10 @@ public class Graphics {
         int entityY = centerY + (int)(size * 0.4);
 
         if (entity instanceof LivingEntity living) {
-            
-            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, mouseX, mouseY, 0f, 0f, living);
+            float mouseX = 0f; 
+            float mouseY = 0f;
+
+            InventoryScreen.drawEntity(context, centerX, entityY, (int)size, mouseX, mouseY, living);
             
         } else if (entity instanceof ItemEntity itemEntity) {
             renderStack(context, itemEntity.getStack(), centerX - 8, centerY - 8, 0, (int)size);
