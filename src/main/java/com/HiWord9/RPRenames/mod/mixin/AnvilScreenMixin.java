@@ -128,12 +128,13 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
                 || instance.isActive();
     }
     
-    @Inject(at = @At("HEAD"), method = "mouseClicked", cancellable = true)
-    public void onMouseClickedInject(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-        
-        if (shouldNotModify()) return;
-        
-        if (myMouseClicked(mouseX, mouseY, button)) {
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    private void onMouseClickedInject(Click click, boolean isReleased, CallbackInfoReturnable<Boolean> cir) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int button = click.button();
+
+        if (this.myMouseClicked(mouseX, mouseY, button)) {
             cir.setReturnValue(true);
         }
     }
