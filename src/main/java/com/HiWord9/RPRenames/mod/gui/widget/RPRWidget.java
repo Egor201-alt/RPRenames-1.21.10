@@ -20,6 +20,8 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
+import net.minecraft.client.input.Click;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -428,22 +430,31 @@ public class RPRWidget implements Drawable, OffsetableWidget {
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!open) return false;
+
+        Click clickEvent = new Click(mouseX, mouseY, button);
+
         for (ClickableWidget widget : widgets) {
-            if (widget.mouseClicked(mouseX, mouseY, button)) {
+            if (widget.mouseClicked(clickEvent, false)) {
                 if (widget == searchField && currentScreen() != null) currentScreen().setFocused(searchField);
                 return true;
             } else if (widget == searchField && currentScreen() != null && currentScreen().getFocused() == searchField && button == 0 && !widget.isMouseOver(mouseX, mouseY)) {
                 currentScreen().setFocused(null);
             }
         }
-        for (RenameButton renameButton : buttons) { if (renameButton.mouseClicked(mouseX, mouseY, button)) return true; }
+        
+        for (RenameButton renameButton : buttons) { 
+            if (renameButton.mouseClicked(clickEvent, false)) return true;
+        }
         return false;
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!open) return false;
+        
+        KeyInput keyInput = new KeyInput(keyCode, scanCode, modifiers);
+
         for (ClickableWidget widget : widgets) {
-            if (widget.keyPressed(keyCode, scanCode, modifiers)) return true; 
+            if (widget.keyPressed(keyInput)) return true; 
         }
         return false;
     }
