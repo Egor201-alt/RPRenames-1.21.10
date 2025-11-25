@@ -13,6 +13,8 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.util.math.MatrixStack; 
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
@@ -120,7 +122,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     private boolean onKeyPressedNameFieldIsActive(TextFieldWidget instance, int keyCode, int scanCode, int modifiers) {
         if (shouldNotModify()) return instance.isActive();
         
-        return rprWidget.keyPressed(keyCode, scanCode, modifiers)
+        return rprWidget.keyPressed(new KeyInput(keyCode, scanCode, modifiers))
                 || rprWidget.searchField.isActive()
                 || instance.isActive();
     }
@@ -140,7 +142,9 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         afterPutInAnvilSecond = false;
         
         if (opener.mouseClicked(mouseX, mouseY, button)) return true;
+        
         if (favoriteButton.mouseClicked(mouseX, mouseY, button)) return true;
+        
         if (ghostCraft.mouseClicked(mouseX, mouseY, button)) {
             if (rprWidget.getActiveItemStack().isEmpty()) {
                 nameField.setText("");
@@ -149,7 +153,8 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
                 }
             }
         }
-        if (rprWidget.mouseClicked(mouseX, mouseY, button)) return true;
+    
+        if (rprWidget.mouseClicked(new Click(mouseX, mouseY, button), false)) return true;
         
         return false;
     }
