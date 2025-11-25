@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
+import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
@@ -25,6 +26,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.joml.Vector2ic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,10 +146,41 @@ public class Graphics {
     public static void drawTooltip(DrawContext context, TextRenderer textRenderer, List<TooltipComponent> components, int x, int y, TooltipPositioner positioner, boolean favorite) {
         renderTooltipAsFavorite = favorite;
         try {
-            context.drawTooltip(textRenderer, components, x, y, positioner, null);
-            
+            if (components.isEmpty()) return;
+
+            int width = 0;
+            int height = components.size() == 1 ? -2 : 0;
+            for (TooltipComponent component : components) {
+                int w = component.getWidth(textRenderer);
+                if (w > width) width = w;
+                height += component.getHeight(textRenderer);
+            }
+
+            Vector2ic position = positioner.getPosition(context.getScaledWindowWidth(), context.getScaledWindowHeight(), x, y, width, height);
+            int tooltipX = position.x();
+            int tooltipY = position.y();
+
+            context.getMatrices().push();
+            context.getMatrices().translate(0.0f, 0.0f, 400.0f);
+
+            TooltipBackgroundRenderer.render(context, tooltipX, tooltipY, width, height, 400);
+
+            int currentY = tooltipY;
+            for (int i = 0; i < components.size(); i++) {
+                TooltipComponent component = components.get(i);
+                
+                component.drawText(textRenderer, tooltipX, currentY, context.getMatrices().peek().getPositionMatrix(), context.getVertexConsumers());
+                
+                component.drawItems(textRenderer, tooltipX, currentY, context);
+                
+                currentY += component.getHeight(textRenderer) + (i == 0 ? 2 : 0);
+            }
+
+            context.getMatrices().pop();
+
         } catch (Exception e) {
             // Ignored
+            e.printStackTrace();
         }
         renderTooltipAsFavorite = false;
     }
