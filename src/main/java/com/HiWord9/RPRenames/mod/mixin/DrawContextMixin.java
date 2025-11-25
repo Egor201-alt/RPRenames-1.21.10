@@ -22,33 +22,37 @@ public abstract class DrawContextMixin {
     @Nullable
     private Runnable tooltipDrawer;
 
+    @Shadow
+    public abstract void drawTooltipImmediately(TextRenderer textRenderer, List<TooltipComponent> components, int x, int y, TooltipPositioner positioner, @Nullable Identifier texture);
+
     @Unique
     private final List<Runnable> extraTooltipDrawers = new ArrayList<>();
 
     @Inject(
-            method = "drawTooltip(Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;IILnet/minecraft/client/gui/tooltip/TooltipPositioner;Lnet/minecraft/util/Identifier;Z)V",
-            at = @At("HEAD"), cancellable = true
+            method = "drawTooltip(Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;IILnet/minecraft/client/gui/tooltip/TooltipPositioner;Lnet/minecraft/util/Identifier;)V",
+            at = @At("HEAD"), 
+            cancellable = true
     )
-    private void onDrawTooltip(TextRenderer textRenderer, List<TooltipComponent> components, int x, int y, TooltipPositioner positioner, @Nullable Identifier texture, boolean focused, CallbackInfo ci) {
+    private void onDrawTooltip(TextRenderer textRenderer, List<TooltipComponent> components, int x, int y, TooltipPositioner positioner, @Nullable Identifier texture, CallbackInfo ci) {
         if (!components.isEmpty()) {
-            if (tooltipDrawer == null || focused) {
-                tooltipDrawer = () -> ((DrawContext)(Object)this)
-                        .drawTooltipImmediately(textRenderer, components, x, y, positioner, texture);
+            if (tooltipDrawer == null) {
+                tooltipDrawer = () -> this.drawTooltipImmediately(textRenderer, components, x, y, positioner, texture);
             } else {
-                extraTooltipDrawers.add(() -> ((DrawContext)(Object)this)
-                        .drawTooltipImmediately(textRenderer, components, x, y, positioner, texture));
+                extraTooltipDrawers.add(() -> this.drawTooltipImmediately(textRenderer, components, x, y, positioner, texture));
             }
             ci.cancel();
         }
     }
 
-    @Inject(method = "renderTooltip", at = @At("TAIL"))
-    private void afterRenderTooltip(CallbackInfo ci) {
+    @Inject(method = "draw", at = @At("TAIL"))
+    private void afterDraw(CallbackInfo ci) {
         if (!extraTooltipDrawers.isEmpty()) {
             DrawContext ctx = (DrawContext)(Object)this;
+            
             for (Runnable drawer : extraTooltipDrawers) {
-                ctx.createNewRootLayer();
+                
                 drawer.run();
+                
             }
             extraTooltipDrawers.clear();
         }
