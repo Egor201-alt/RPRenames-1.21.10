@@ -111,10 +111,13 @@ public class CEMRename extends ResourcePackRename implements HasProperties, HasN
             if (entityData != null) {
                 NbtCompound nbt = entityData.copyNbt();
                 
-                if (nbt.contains("CustomName", NbtElement.STRING_TYPE)) { 
+                if (nbt.contains("CustomName")) { 
                    try {
-                       String jsonName = nbt.getString("CustomName");
-                       name = Text.literal(jsonName); 
+                       String jsonName = nbt.getString("CustomName").orElse("");
+                       
+                       if (!jsonName.isEmpty()) {
+                           name = Text.literal(jsonName); 
+                       }
                    } catch (Exception ignored) {}
                 }
             }
