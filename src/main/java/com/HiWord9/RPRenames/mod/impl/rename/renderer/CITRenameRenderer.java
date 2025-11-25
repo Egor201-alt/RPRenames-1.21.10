@@ -219,8 +219,9 @@ public class CITRenameRenderer extends SimpleRenameRenderer<CITRename> implement
         ArrayList<TooltipComponent> tooltipAddition = new ArrayList<>();
 
         if (config().enablePreview) {
-            long handle = MinecraftClient.getInstance().getWindow().getHandle();
-            boolean shiftDown = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
+            var window = MinecraftClient.getInstance().getWindow();
+            
+            boolean shiftDown = InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
 
             if (!shiftDown && !config().playerPreviewByDefault) {
                 if (!config().disableTooltipHints) tooltipAddition.add(tooltipOf(playerPreviewHintShift));
@@ -253,10 +254,11 @@ public class CITRenameRenderer extends SimpleRenameRenderer<CITRename> implement
         tooltipComponents.removeAll(tooltipAddition);
     }
 
+
     @Override
     public void drawPreview(DrawContext context, int mouseX, int mouseY, List<TooltipComponent> mainTooltip) {
-        long handle = MinecraftClient.getInstance().getWindow().getHandle();
-        boolean shiftDown = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
+        var window = MinecraftClient.getInstance().getWindow();
+        boolean shiftDown = InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
         
         boolean shouldPreviewPlayer = shiftDown != config().playerPreviewByDefault;
         TooltipPositioner positioner = new PreviewTooltipPositioner(mainTooltip);
@@ -267,6 +269,7 @@ public class CITRenameRenderer extends SimpleRenameRenderer<CITRename> implement
             itemPreview(context, mouseX, mouseY, positioner);
         }
     }
+
 
     private void playerPreview(DrawContext context, int mouseX, int mouseY, TooltipPositioner positioner) {
         if (isFKeyJustPressed()) {
@@ -297,7 +300,7 @@ public class CITRenameRenderer extends SimpleRenameRenderer<CITRename> implement
     private boolean fPressFuse = false;
 
     private boolean isFKeyJustPressed() {
-        if (InputUtil.isKeyPressed(client().getWindow().getHandle(), GLFW.GLFW_KEY_F)) {
+        if (InputUtil.isKeyPressed(client().getWindow(), GLFW.GLFW_KEY_F)) {
             if (!fPressFuse) {
                 fPressFuse = true;
                 return true;
