@@ -5,6 +5,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
@@ -50,8 +51,7 @@ public class PageButton extends ClickableWidget implements OffsetableWidget {
             TEXTURE_WIDTH, TEXTURE_HEIGHT
         );
 
-        long handle = MinecraftClient.getInstance().getWindow().getHandle();
-        boolean shift = InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT_SHIFT) || InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
+        boolean shift = Screen.hasShiftDown();
 
         if (!config().disablePageArrowsHints && shift && active && isHovered()) {
             String key = "rprenames.gui.page" + (type == Type.DOWN ? "Down.toFirst" : "Up.toLast") + ".tooltip";
