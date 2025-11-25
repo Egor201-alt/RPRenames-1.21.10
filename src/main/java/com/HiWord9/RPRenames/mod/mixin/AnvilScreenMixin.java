@@ -52,8 +52,8 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
 
     boolean init = false;
 
-    @Inject(at = @At("TAIL"), method = "init(Lnet/minecraft/client/MinecraftClient;II)V")
-    private void init(MinecraftClient client, int width, int height, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "init()V")
+    private void init(CallbackInfo ci) {
         if (shouldNotModify() || init) return;
         init = true;
 
@@ -128,15 +128,17 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
                 || instance.isActive();
     }
     
-    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void onMouseClickedInject(Click click, boolean isReleased, CallbackInfoReturnable<Boolean> cir) {
+    @Override
+    public boolean mouseClicked(Click click, boolean isReleased) {
         double mouseX = click.x();
         double mouseY = click.y();
         int button = click.button();
 
         if (this.myMouseClicked(mouseX, mouseY, button)) {
-            cir.setReturnValue(true);
+            return true;
         }
+        
+        return super.mouseClicked(click, isReleased);
     }
 
     public boolean myMouseClicked(double mouseX, double mouseY, int button) {
