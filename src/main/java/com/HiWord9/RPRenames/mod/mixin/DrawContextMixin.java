@@ -18,6 +18,7 @@ import java.util.List;
 
 @Mixin(DrawContext.class)
 public abstract class DrawContextMixin {
+
     @Shadow
     @Nullable
     private Runnable tooltipDrawer;
@@ -47,12 +48,8 @@ public abstract class DrawContextMixin {
     @Inject(method = "draw", at = @At("TAIL"))
     private void afterDraw(CallbackInfo ci) {
         if (!extraTooltipDrawers.isEmpty()) {
-            DrawContext ctx = (DrawContext)(Object)this;
-            
             for (Runnable drawer : extraTooltipDrawers) {
-                
                 drawer.run();
-                
             }
             extraTooltipDrawers.clear();
         }
