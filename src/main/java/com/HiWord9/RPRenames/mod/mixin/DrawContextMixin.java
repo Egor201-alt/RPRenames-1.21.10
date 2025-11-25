@@ -30,7 +30,7 @@ public abstract class DrawContextMixin {
     private final List<Runnable> extraTooltipDrawers = new ArrayList<>();
 
     @Inject(
-            method = "drawTooltip(Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;IILnet/minecraft/client/gui/tooltip/TooltipPositioner;Lnet/minecraft/util/Identifier;)V",
+            method = "drawTooltipImmediately(Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;IILnet/minecraft/client/gui/tooltip/TooltipPositioner;Lnet/minecraft/util/Identifier;)V",
             at = @At("HEAD"), 
             cancellable = true
     )
