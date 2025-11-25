@@ -155,7 +155,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
             }
         }
     
-        if (rprWidget.mouseClicked(new Click(mouseX, mouseY, new MouseInput(button)), false)) return true;
+        if (rprWidget.mouseClicked(new Click(mouseX, mouseY, new MouseInput(button, 0)), false)) return true;
         
         return false;
     }
