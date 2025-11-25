@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.MouseInput;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.util.math.MatrixStack; 
 import net.minecraft.item.ItemStack;
@@ -154,7 +155,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
             }
         }
     
-        if (rprWidget.mouseClicked(new Click(mouseX, mouseY, button), false)) return true;
+        if (rprWidget.mouseClicked(new Click(mouseX, mouseY, new MouseInput(button)), false)) return true;
         
         return false;
     }
