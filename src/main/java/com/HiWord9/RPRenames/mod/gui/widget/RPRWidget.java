@@ -429,28 +429,26 @@ public class RPRWidget implements Drawable, OffsetableWidget {
         if (focusedButton != null) focusedButton.renderTooltip(context, mouseX, mouseY);
     }
     
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean isReleased) { 
         if (!open) return false;
 
-        for (Element widget : widgets) {
-            if (widget.mouseClicked(mouseX, mouseY, button)) {
-                if (widget == searchField && currentScreen() != null) {
-                    currentScreen().setFocused(searchField);
-                }
+        double mouseX = click.x(); 
+        double mouseY = click.y();
+        int button = click.button();
+
+        for (ClickableWidget widget : widgets) {
+            if (widget.mouseClicked(click, isReleased)) {
+                if (widget == searchField && currentScreen() != null) currentScreen().setFocused(searchField);
                 return true;
-            } else if (
-                    widget == searchField
-                            && currentScreen() != null
-                            && currentScreen().getFocused() == searchField
-            ) {
+            } 
+            else if (widget == searchField && currentScreen() != null && currentScreen().getFocused() == searchField && button == 0 && !widget.isMouseOver(mouseX, mouseY)) {
                 currentScreen().setFocused(null);
             }
         }
-        for (RenameButton renameButton : buttons) {
-            if (renameButton.mouseClicked(mouseX, mouseY, button)) return true;
+        
+        for (RenameButton renameButton : buttons) { 
+            if (renameButton.mouseClicked(click, isReleased)) return true; 
         }
-
         return false;
     }
 
