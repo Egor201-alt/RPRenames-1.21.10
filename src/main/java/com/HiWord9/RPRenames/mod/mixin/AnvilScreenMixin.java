@@ -5,7 +5,7 @@ import com.HiWord9.RPRenames.mod.gui.RPRInteractableScreen;
 import com.HiWord9.RPRenames.mod.gui.widget.GhostCraft;
 import com.HiWord9.RPRenames.mod.gui.widget.Offsetable;
 import com.HiWord9.RPRenames.mod.gui.widget.OffsetableWidget;
-import com.HiWord9.RPRenames.mod.gui.widget.RPRWidget;
+import com.HiWord9.RPRenames.mod.gui.widget.RPRWidget; 
 import com.HiWord9.RPRenames.mod.gui.widget.external.FavoriteButton;
 import com.HiWord9.RPRenames.mod.gui.widget.external.OpenerButton;
 import net.minecraft.client.MinecraftClient;
