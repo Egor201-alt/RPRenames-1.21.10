@@ -10,6 +10,7 @@ import com.HiWord9.RPRenames.mod.impl.rename.CITRename;
 import com.HiWord9.RPRenames.mod.impl.renames_manager.favorite.FavoritesManager;
 import com.HiWord9.RPRenames.mod.util.RenamesHelper;
 import com.HiWord9.RPRenames.mod.util.RenamesSearchEngine;
+import com.HiWord9.RPRenames.mod.util.MouseInput;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
@@ -430,31 +431,26 @@ public class RPRWidget implements Drawable, OffsetableWidget {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Click click = new Click(mouseX, mouseY, button);
-        
-        return this.mouseClicked(click, false);
-    }
-
-    public boolean mouseClicked(Click click, boolean isReleased) { 
         if (!open) return false;
 
-        double mouseX = click.x(); 
-        double mouseY = click.y();
-        int button = click.button();
-
-        for (ClickableWidget widget : widgets) {
-            if (widget.mouseClicked(click, isReleased)) {
-                if (widget == searchField && currentScreen() != null) currentScreen().setFocused(searchField);
+        for (Element widget : widgets) {
+            if (widget.mouseClicked(mouseX, mouseY, button)) {
+                if (widget == searchField && currentScreen() != null) {
+                    currentScreen().setFocused(searchField);
+                }
                 return true;
-            } 
-            else if (widget == searchField && currentScreen() != null && currentScreen().getFocused() == searchField && button == 0 && !widget.isMouseOver(mouseX, mouseY)) {
+            } else if (
+                    widget == searchField
+                            && currentScreen() != null
+                            && currentScreen().getFocused() == searchField
+            ) {
                 currentScreen().setFocused(null);
             }
         }
-        
-        for (RenameButton renameButton : buttons) { 
-            if (renameButton.mouseClicked(click, isReleased)) return true; 
+        for (RenameButton renameButton : buttons) {
+            if (renameButton.mouseClicked(mouseX, mouseY, button)) return true;
         }
+
         return false;
     }
 
