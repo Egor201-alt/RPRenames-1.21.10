@@ -50,7 +50,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     OpenerButton opener;
     FavoriteButton favoriteButton;
 
-    @Unique boolean rpr_initialized = false;
+    @Unique boolean rpr_initialized = false; 
     @Unique int rpr_lastWidth = -1;
     @Unique int rpr_lastHeight = -1;
 
