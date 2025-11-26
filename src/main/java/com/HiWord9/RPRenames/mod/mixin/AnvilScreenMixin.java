@@ -123,7 +123,6 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         afterPutInAnvilFirst = false;
         afterPutInAnvilSecond = false;
         
-        // Добавлены проверки на null, так как клик может произойти до полной загрузки
         if (opener != null && opener.mouseClicked(mouseX, mouseY, button)) return true;
         if (favoriteButton != null && favoriteButton.mouseClicked(mouseX, mouseY, button)) return true;
         
