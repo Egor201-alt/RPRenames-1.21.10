@@ -49,7 +49,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     GhostCraft ghostCraft;
     OpenerButton opener;
     FavoriteButton favoriteButton;
-    
+
     @Unique boolean rpr_initialized = false;
     @Unique int rpr_lastWidth = -1;
     @Unique int rpr_lastHeight = -1;
@@ -86,7 +86,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
                 favoriteButton,
                 ghostCraft
         );
-        
+
         if (config().openByDefault) opener.execute();
         if (rprWidget.isOpen()) updateMenuShift();
     }
@@ -106,7 +106,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         if (shouldNotModify() || !rpr_initialized) return;
         rprWidget.updatedName();
     }
-    
+
     public boolean mouseClicked(Click click, boolean isReleased) {
         double mouseX = click.x();
         double mouseY = click.y();
@@ -123,6 +123,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         afterPutInAnvilFirst = false;
         afterPutInAnvilSecond = false;
         
+        // Добавлены проверки на null, так как клик может произойти до полной загрузки
         if (opener != null && opener.mouseClicked(mouseX, mouseY, button)) return true;
         if (favoriteButton != null && favoriteButton.mouseClicked(mouseX, mouseY, button)) return true;
         
@@ -143,6 +144,9 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     @Inject(at = @At("HEAD"), method = "onSlotUpdate", cancellable = true)
     private void itemUpdateHead(ScreenHandler handler, int slotId, ItemStack stack, CallbackInfo ci) {
         if (shouldNotModify()) return;
+        
+        if (!rpr_initialized) return; 
+
         if (slotId != 0) return;
 
         if (config().fixDelayedPacketsChangingTab) {
@@ -165,6 +169,9 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     @Inject(at = @At("RETURN"), method = "onSlotUpdate")
     private void itemUpdateReturn(ScreenHandler handler, int slotId, ItemStack stack, CallbackInfo ci) {
         if (shouldNotModify()) return;
+        
+        if (!rpr_initialized) return; 
+        
         rprWidget.updatedItem(slotId, stack);
     }
 
@@ -195,7 +202,7 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     private void onDrawForeground(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
         if (shouldNotModify()) return;
         if (client == null || client.currentScreen == null) return;
-        if (opener == null) return;
+        if (opener == null) return; 
 
         AnvilScreen screen = (AnvilScreen) client.currentScreen;
         int xScreenOffset = screen.x;
