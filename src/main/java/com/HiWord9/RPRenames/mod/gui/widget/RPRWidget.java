@@ -429,6 +429,12 @@ public class RPRWidget implements Drawable, OffsetableWidget {
     }
     
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        Click click = new Click(mouseX, mouseY, button);
+        
+        return this.mouseClicked(click, false);
+    }
+
     public boolean mouseClicked(Click click, boolean isReleased) { 
         if (!open) return false;
 
