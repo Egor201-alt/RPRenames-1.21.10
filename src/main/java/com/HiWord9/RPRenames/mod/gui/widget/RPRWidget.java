@@ -428,7 +428,6 @@ public class RPRWidget implements Drawable, OffsetableWidget {
         if (focusedButton != null) focusedButton.renderTooltip(context, mouseX, mouseY);
     }
     
-    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         MouseInput inputType;
         if (button == 0) {
