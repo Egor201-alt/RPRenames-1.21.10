@@ -16,12 +16,12 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.input.MouseInput;
-import net.minecraft.client.util.math.MatrixStack; 
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -49,14 +49,15 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     GhostCraft ghostCraft;
     OpenerButton opener;
     FavoriteButton favoriteButton;
+    
+    @Unique boolean rpr_initialized = false;
+    @Unique int rpr_lastWidth = -1;
+    @Unique int rpr_lastHeight = -1;
 
-    boolean init = false;
-
-    @Inject(at = @At("TAIL"), method = "init()V")
-    private void init(CallbackInfo ci) {
-        if (shouldNotModify() || init) return;
-        init = true;
-
+    @Unique
+    private void rprInit() {
+        if (shouldNotModify()) return;
+        
         AnvilScreen screen = (AnvilScreen) (Object) this;
         int x = screen.x;
         int y = screen.y;
@@ -85,50 +86,27 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
                 favoriteButton,
                 ghostCraft
         );
-
+        
         if (config().openByDefault) opener.execute();
+        if (rprWidget.isOpen()) updateMenuShift();
+    }
+
+    @Inject(at = @At("HEAD"), method = "drawForeground")
+    private void onDrawForegroundHead(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
+        if (!rpr_initialized || this.width != rpr_lastWidth || this.height != rpr_lastHeight) {
+            this.rpr_lastWidth = this.width;
+            this.rpr_lastHeight = this.height;
+            this.rpr_initialized = true;
+            rprInit();
+        }
     }
 
     @Inject(at = @At("RETURN"), method = "onRenamed")
     private void newNameEntered(String name, CallbackInfo ci) {
-        if (shouldNotModify() || !init) return;
+        if (shouldNotModify() || !rpr_initialized) return;
         rprWidget.updatedName();
     }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AnvilScreen;init(Lnet/minecraft/client/MinecraftClient;II)V"), method = "resize")
-    private void onResize(AnvilScreen instance, MinecraftClient client, int width, int height) {
-        if (shouldNotModify()) {
-            instance.init(client, width, height);
-            return;
-        }
-
-        int prevX = instance.x;
-        int prevY = instance.y;
-
-        instance.init(client, width, height);
-
-        offsetWidgets(instance.x - prevX, instance.y - prevY);
-        
-        if (rprWidget.isOpen()) updateMenuShift();
-    }
-
-    @Inject(at = @At(value = "HEAD"), method = "keyPressed")
-    public void onKeyPressedHead(KeyInput input, CallbackInfoReturnable<Boolean> cir) {
-        if (shouldNotModify()) return;
-        afterPutInAnvilFirst = false;
-        afterPutInAnvilSecond = false;
-    }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;isActive()Z"), method = "keyPressed")
-    private boolean onKeyPressedNameFieldIsActive(TextFieldWidget instance, KeyInput input) {
-        if (shouldNotModify()) return instance.isActive();
-        
-        return rprWidget.keyPressed(input)
-                || rprWidget.searchField.isActive()
-                || instance.isActive();
-    }
     
-    @Override
     public boolean mouseClicked(Click click, boolean isReleased) {
         double mouseX = click.x();
         double mouseY = click.y();
@@ -145,10 +123,10 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
         afterPutInAnvilFirst = false;
         afterPutInAnvilSecond = false;
         
-        if (opener.mouseClicked(mouseX, mouseY, button)) return true;
-        if (favoriteButton.mouseClicked(mouseX, mouseY, button)) return true;
+        if (opener != null && opener.mouseClicked(mouseX, mouseY, button)) return true;
+        if (favoriteButton != null && favoriteButton.mouseClicked(mouseX, mouseY, button)) return true;
         
-        if (ghostCraft.mouseClicked(mouseX, mouseY, button)) {
+        if (ghostCraft != null && ghostCraft.mouseClicked(mouseX, mouseY, button)) {
             if (rprWidget.getActiveItemStack().isEmpty()) {
                 nameField.setText("");
                 if (rprWidget.getCurrentTab().forCraftItemOnly) {
@@ -207,16 +185,17 @@ public abstract class AnvilScreenMixin extends Screen implements RPRInteractable
     }
 
     private void offsetWidgets(int x, int y) {
-        opener.offset(x, y);
-        favoriteButton.offset(x, y);
+        if (opener != null) opener.offset(x, y);
+        if (favoriteButton != null) favoriteButton.offset(x, y);
         rprWidget.offset(x, y);
-        ghostCraft.offset(x, y);
+        if (ghostCraft != null) ghostCraft.offset(x, y);
     }
 
     @Inject(at = @At("HEAD"), method = "drawForeground")
     private void onDrawForeground(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
         if (shouldNotModify()) return;
         if (client == null || client.currentScreen == null) return;
+        if (opener == null) return;
 
         AnvilScreen screen = (AnvilScreen) client.currentScreen;
         int xScreenOffset = screen.x;
